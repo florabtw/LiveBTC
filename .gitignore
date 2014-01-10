@@ -1,0 +1,5 @@
+.settings/
+libs/
+proguard-project.txt
+project.properties
+lint.xml
