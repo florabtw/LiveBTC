@@ -35,11 +35,11 @@ public class MainWallpaper extends WallpaperService {
 
 		private Paint graphPaint;
 		private final Handler handler = new Handler();
-		private int myWidth, myHeight, TOP_OFFSET, SIDE_OFFSET, HATCH_LENGTH, Y_LABEL_SPACE;
+		private int myWidth, myHeight, TOP_OFFSET, SIDE_OFFSET, BOTTOM_OFFSET, TICK_LENGTH, Y_LABEL_SPACE, X_LABEL_SPACE;
 
 		private final int STROKE_WIDTH = 4; // best if even number
-		private final int X_HATCHES = 8;
-		private final int Y_HATCHES = 5;
+		private final int X_TICKS = 4;
+		private final int Y_TICKS = 4;
 		private final int PADDING = 10;
 
 		private final Runnable runnable = new Runnable() {
@@ -47,15 +47,6 @@ public class MainWallpaper extends WallpaperService {
 				new GetPricesTask().execute();
 			}
 		};
-
-		public MyEngine() {
-			graphPaint = new Paint();
-			graphPaint.setColor(Color.WHITE);
-			graphPaint.setStrokeWidth(STROKE_WIDTH);
-			graphPaint.setTextSize(40);
-			graphPaint.setStyle(Paint.Style.FILL);
-			graphPaint.setAntiAlias(true);
-		}
 
 		@Override
 		public void onCreate(SurfaceHolder surfaceHolder) {
@@ -70,9 +61,23 @@ public class MainWallpaper extends WallpaperService {
 			myWidth = metrics.widthPixels;
 			myHeight = metrics.heightPixels;
 
+			int textSize = myWidth / 40;
+
+			graphPaint = new Paint();
+			graphPaint.setColor(Color.WHITE);
+			graphPaint.setStrokeWidth(STROKE_WIDTH);
+			graphPaint.setStyle(Paint.Style.FILL);
+			graphPaint.setAntiAlias(true);
+			graphPaint.setTextSize(textSize);
+
+			BOTTOM_OFFSET = myHeight / 100;
 			SIDE_OFFSET = myWidth / 100;
-			HATCH_LENGTH = myHeight / 100;
+			TICK_LENGTH = myHeight / 100;
 			Y_LABEL_SPACE = (int) graphPaint.measureText("000");
+
+			Rect rect = new Rect();
+			graphPaint.getTextBounds("0m", 0, 2, rect);
+			X_LABEL_SPACE = rect.height();
 
 			new GetPricesTask().execute();
 		}
@@ -133,17 +138,21 @@ public class MainWallpaper extends WallpaperService {
 		}
 
 		void drawChart(Canvas c, String prices) {
-			int bottomY = myHeight - TOP_OFFSET;
 			int halfStroke = STROKE_WIDTH / 2;
+			int yOffset = myHeight - BOTTOM_OFFSET - X_LABEL_SPACE - PADDING;
 			int xOffset = SIDE_OFFSET + Y_LABEL_SPACE + PADDING;
+			int yAxisHeight = yOffset - TOP_OFFSET;
+			int xAxisWidth = myWidth - SIDE_OFFSET - xOffset;
+			int minutesInterval = 15;
+			int dataPoints = 8;
 
-			ArrayList<Float> values = PriceParser.parse(prices, X_HATCHES + 1, 15);
+			ArrayList<Float> values = PriceParser.parse(prices, dataPoints + 1, minutesInterval);
 
 			// turn values into x, y coordinates
 			float maxVal = Collections.max(values);
 			float minVal = Collections.min(values);
-			double xScale = ((double) myWidth - xOffset - SIDE_OFFSET) / (values.size() - 1);
-			double yScale = ((double) myHeight - 2 * TOP_OFFSET) / (maxVal - minVal);
+			float xScale = ((float) xAxisWidth) / (values.size() - 1);
+			float yScale = ((float) yAxisHeight) / (maxVal - minVal);
 			List<Point> graphPoints = new ArrayList<Point>();
 			for (int i = 0; i < values.size(); i++) {
 				int x = (int) (i * xScale + xOffset);
@@ -155,34 +164,35 @@ public class MainWallpaper extends WallpaperService {
 			c.drawColor(Color.BLACK);
 
 			// draw axes
-			c.drawLine(xOffset, TOP_OFFSET, xOffset, bottomY + halfStroke, graphPaint);
-			c.drawLine(xOffset + halfStroke, bottomY, myWidth - SIDE_OFFSET, bottomY, graphPaint);
+			c.drawLine(xOffset, TOP_OFFSET, xOffset, yOffset + halfStroke, graphPaint);
+			c.drawLine(xOffset + halfStroke, yOffset, myWidth - SIDE_OFFSET, yOffset, graphPaint);
 
-			// draw hatch marks for x axis
-			int xAxisWidth = myWidth - SIDE_OFFSET - xOffset;
-			float xAxisHatchInterval = (float) xAxisWidth / X_HATCHES;
-			for (float i = myWidth - SIDE_OFFSET - halfStroke; i > xOffset; i -= xAxisHatchInterval) {
-				c.drawLine(i, bottomY + halfStroke, i, bottomY + halfStroke - HATCH_LENGTH, graphPaint);
+			// draw tick marks, labels for x axis
+			float xTickInterval = (float) xAxisWidth / X_TICKS;
+			String[] xLabels = getResources().getStringArray(R.array.thirty_min_interval);
+			DrawHelper.drawXLabel(c, xLabels[xLabels.length - 1], graphPaint, xOffset, myHeight - BOTTOM_OFFSET, DrawHelper.Position.PAST);
+			for (int i = 1; i < X_TICKS; i++) {
+				float xPos = (myWidth - SIDE_OFFSET) - (i * xTickInterval);
+				c.drawLine(xPos, yOffset + halfStroke, xPos, yOffset + halfStroke - TICK_LENGTH, graphPaint);
+
+				DrawHelper.drawXLabel(c, xLabels[i], graphPaint, xPos, myHeight - BOTTOM_OFFSET, DrawHelper.Position.CENTER);
 			}
+			c.drawLine(myWidth - SIDE_OFFSET, yOffset + halfStroke, myWidth - SIDE_OFFSET, yOffset + halfStroke - TICK_LENGTH, graphPaint);
+			DrawHelper.drawXLabel(c, xLabels[0], graphPaint, myWidth - SIDE_OFFSET, myHeight - BOTTOM_OFFSET, DrawHelper.Position.BEFORE);
 
-			// draw hatch marks for y axis
-			int yAxisHeight = myHeight - TOP_OFFSET * 2;
-			float yAxisHatchInterval = (float) yAxisHeight / Y_HATCHES;
-			for (float i = TOP_OFFSET + halfStroke, j = 0; i < myHeight - TOP_OFFSET; i += yAxisHatchInterval, j++) {
-				c.drawLine(xOffset - halfStroke, i, xOffset - halfStroke + HATCH_LENGTH, i, graphPaint);
+			// draw tick marks, labels for y axis
+			float yTickInterval = (float) yAxisHeight / Y_TICKS;
+			float yValueInterval = (maxVal - minVal) / Y_TICKS;
+			c.drawLine(xOffset - halfStroke, TOP_OFFSET, xOffset + TICK_LENGTH, TOP_OFFSET, graphPaint);
+			DrawHelper.drawYLabel(c, String.valueOf(Math.round(maxVal)), graphPaint, SIDE_OFFSET, TOP_OFFSET, DrawHelper.Position.PAST);
+			for (int i = 1; i < Y_TICKS; i++) {
+				float yPos = TOP_OFFSET + (i * yTickInterval);
+				c.drawLine(xOffset - halfStroke, yPos, xOffset + TICK_LENGTH, yPos, graphPaint);
 
-				float yInterval = (maxVal - minVal) / Y_HATCHES;
-				String yLabel = String.valueOf((int) Math.round(maxVal - (j * yInterval)));
-				Rect rect = new Rect();
-				graphPaint.getTextBounds(yLabel, 0, yLabel.length(), rect);
-				c.drawText(yLabel, SIDE_OFFSET, i + rect.height() / 2, graphPaint);
+				String yLabel = String.valueOf((int) Math.round(maxVal - (i * yValueInterval)));
+				DrawHelper.drawYLabel(c, yLabel, graphPaint, SIDE_OFFSET, yPos, DrawHelper.Position.CENTER);
 			}
-
-			// TODO refactor
-			String yLabel = String.valueOf((int) Math.round(minVal));
-			Rect rect = new Rect();
-			graphPaint.getTextBounds(yLabel, 0, yLabel.length(), rect);
-			c.drawText(yLabel, SIDE_OFFSET, myHeight - TOP_OFFSET, graphPaint);
+			DrawHelper.drawYLabel(c, String.valueOf(Math.round(minVal)), graphPaint, SIDE_OFFSET, yOffset, DrawHelper.Position.BEFORE);
 
 			// draw lines for graph
 			c.drawCircle(graphPoints.get(0).x, graphPoints.get(0).y, halfStroke, graphPaint);
