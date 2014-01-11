@@ -10,7 +10,7 @@ import android.util.Log;
 
 public class PriceParser {
 
-	private static final int VAL_START = 26;
+	private static final int VAL_START = 20;
 	private static final int DATE_END = 19;
 
 	private static SimpleDateFormat format;
@@ -20,9 +20,9 @@ public class PriceParser {
 
 		ArrayList<Float> results = new ArrayList<Float>();
 		Date now;
-		format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
 		try {
-			now = format.parse(pricesArray[0].substring(0, DATE_END));
+			now = format.parse(pricesArray[pricesArray.length - 1].substring(0, DATE_END));
 		} catch (ParseException e) {
 			Log.e("LiveBTC", "exception", e);
 			return null;
@@ -41,7 +41,11 @@ public class PriceParser {
 	}
 
 	private static float findNearest(String[] pricesArray, Date now, int minutesAgo) {
-		for (int i = 0; i < pricesArray.length - 1; i++) {
+		if (minutesAgo == 0) {
+			return Float.valueOf(pricesArray[pricesArray.length - 1].substring(VAL_START));
+		}
+
+		for (int i = 1; i < pricesArray.length - 1; i++) {
 			Date currDate, nextDate;
 			try {
 				currDate = format.parse(pricesArray[i].substring(0, DATE_END));

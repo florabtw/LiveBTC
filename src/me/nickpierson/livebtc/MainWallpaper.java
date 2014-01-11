@@ -31,7 +31,7 @@ public class MainWallpaper extends WallpaperService {
 
 	class MyEngine extends Engine {
 
-		private static final String PRICES_URL = "https://coinbase.com/api/v1/prices/historical";
+		private static final String PRICES_URL = "https://api.bitcoinaverage.com/history/USD/per_minute_24h_sliding_window.csv";
 
 		private Paint graphPaint;
 		private final Handler handler = new Handler();
@@ -129,7 +129,7 @@ public class MainWallpaper extends WallpaperService {
 			}
 
 			handler.removeCallbacks(runnable);
-			handler.postDelayed(runnable, 100000);
+			handler.postDelayed(runnable, 200000);
 		}
 
 		void drawChart(Canvas c, String prices) {
