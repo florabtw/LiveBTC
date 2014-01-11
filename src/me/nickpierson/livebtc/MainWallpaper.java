@@ -4,10 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
 import android.util.DisplayMetrics;
@@ -22,9 +30,10 @@ public class MainWallpaper extends WallpaperService {
 
 	class MyEngine extends Engine {
 
+		private static final String PRICES_URL = "https://coinbase.com/api/v1/prices/historical";
+
 		private Paint graphPaint;
 		private final Handler handler = new Handler();
-		private boolean isVisible;
 		private int myWidth, myHeight, TOP_OFFSET, SIDE_OFFSET, HATCH_LENGTH;
 
 		private final int STROKE_WIDTH = 4; // best if even number
@@ -33,7 +42,7 @@ public class MainWallpaper extends WallpaperService {
 
 		private final Runnable runnable = new Runnable() {
 			public void run() {
-				draw();
+				new GetPricesTask().execute();
 			}
 		};
 
@@ -61,6 +70,8 @@ public class MainWallpaper extends WallpaperService {
 
 			SIDE_OFFSET = myWidth / 20;
 			HATCH_LENGTH = myHeight / 100;
+
+			new GetPricesTask().execute();
 		}
 
 		@Override
@@ -70,31 +81,43 @@ public class MainWallpaper extends WallpaperService {
 		}
 
 		@Override
-		public void onVisibilityChanged(boolean visible) {
-			isVisible = visible;
-			if (visible) {
-				draw();
-			} else {
-				handler.removeCallbacks(runnable);
-			}
-		}
-
-		@Override
 		public void onSurfaceDestroyed(SurfaceHolder holder) {
 			super.onSurfaceDestroyed(holder);
-			isVisible = false;
 			handler.removeCallbacks(runnable);
 		}
 
-		void draw() {
+		private class GetPricesTask extends AsyncTask<Void, Void, String> {
+			@Override
+			protected String doInBackground(Void... params) {
+				try {
+					HttpClient client = new DefaultHttpClient();
+					HttpGet get = new HttpGet(PRICES_URL);
+					HttpResponse responseGet = client.execute(get);
+					HttpEntity resEntityGet = responseGet.getEntity();
+					if (resEntityGet != null) {
+						return EntityUtils.toString(resEntityGet);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(String result) {
+				draw(result);
+			}
+		}
+
+		void draw(String prices) {
 			final SurfaceHolder holder = getSurfaceHolder();
 
 			Canvas c = null;
 			try {
 				c = holder.lockCanvas();
 				if (c != null) {
-					// draw something
-					drawChart(c);
+					drawChart(c, prices);
 				}
 			} finally {
 				if (c != null) {
@@ -103,13 +126,11 @@ public class MainWallpaper extends WallpaperService {
 			}
 
 			handler.removeCallbacks(runnable);
-			if (isVisible) {
-				handler.postDelayed(runnable, 1000 / 25);
-			}
+			handler.postDelayed(runnable, 100000);
 		}
 
-		void drawChart(Canvas c) {
-			ArrayList<Float> values = PriceGetter.get(9, 15);
+		void drawChart(Canvas c, String prices) {
+			ArrayList<Float> values = PriceParser.parse(prices, X_HATCHES + 1, 15);
 
 			// turn values into x, y coordinates
 			float maxVal = Collections.max(values);
@@ -123,12 +144,14 @@ public class MainWallpaper extends WallpaperService {
 				graphPoints.add(new Point(x, y));
 			}
 
+			// draw background
+			c.drawColor(Color.BLACK);
+
 			// draw axes
 			int bottomY = myHeight - TOP_OFFSET;
 			int halfStroke = STROKE_WIDTH / 2;
-			int leftX = SIDE_OFFSET + halfStroke;
 			c.drawLine(SIDE_OFFSET, TOP_OFFSET, SIDE_OFFSET, bottomY + halfStroke, graphPaint);
-			c.drawLine(leftX, bottomY, myWidth - SIDE_OFFSET, bottomY, graphPaint);
+			c.drawLine(SIDE_OFFSET + halfStroke, bottomY, myWidth - SIDE_OFFSET, bottomY, graphPaint);
 
 			// draw hatch marks for x axis
 			int xAxisWidth = myWidth - SIDE_OFFSET * 2;
