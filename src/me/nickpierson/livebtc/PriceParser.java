@@ -10,6 +10,9 @@ import android.util.Log;
 
 public class PriceParser {
 
+	private static final int VAL_START = 26;
+	private static final int DATE_END = 19;
+
 	private static SimpleDateFormat format;
 
 	public static ArrayList<Float> parse(String prices, int numPoints, int minuteInterval) {
@@ -19,7 +22,7 @@ public class PriceParser {
 		Date now;
 		format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
 		try {
-			now = format.parse(pricesArray[0].substring(0, 19));
+			now = format.parse(pricesArray[0].substring(0, DATE_END));
 		} catch (ParseException e) {
 			Log.e("LiveBTC", "exception", e);
 			return null;
@@ -41,8 +44,8 @@ public class PriceParser {
 		for (int i = 0; i < pricesArray.length - 1; i++) {
 			Date currDate, nextDate;
 			try {
-				currDate = format.parse(pricesArray[i].substring(0, 19));
-				nextDate = format.parse(pricesArray[i + 1].substring(0, 19));
+				currDate = format.parse(pricesArray[i].substring(0, DATE_END));
+				nextDate = format.parse(pricesArray[i + 1].substring(0, DATE_END));
 			} catch (ParseException e) {
 				Log.e("LiveBTC", "exception", e);
 				return 0;
@@ -52,7 +55,7 @@ public class PriceParser {
 			long nextDiff = now.getTime() - (minutesAgo * 60 * 1000) - nextDate.getTime();
 
 			if (Math.abs(nextDiff) > Math.abs(currDiff)) {
-				return Float.valueOf(pricesArray[i].substring(26));
+				return Float.valueOf(pricesArray[i].substring(VAL_START));
 			}
 		}
 
