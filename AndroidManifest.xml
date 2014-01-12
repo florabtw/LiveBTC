@@ -29,6 +29,13 @@
                 android:name="android.service.wallpaper"
                 android:resource="@xml/main_wallpaper" />
         </service>
+
+        <activity
+            android:name=".MainWallpaperSettings"
+            android:exported="true"
+            android:label="@string/prefs_label"
+            android:theme="@style/AppTheme" >
+        </activity>
     </application>
 
 </manifest>
