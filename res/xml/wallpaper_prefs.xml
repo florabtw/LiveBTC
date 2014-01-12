@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="wallpaper_settings"
+    android:title="@string/prefs_label" >
+
+    <EditTextPreference
+        android:defaultValue="1"
+        android:dialogMessage="@string/prefs_bottom_margin_message"
+        android:dialogTitle="@string/prefs_bottom_margin_title"
+        android:key="bottom_margin"
+        android:negativeButtonText="Cancel"
+        android:positiveButtonText="Save"
+        android:summary="@string/prefs_bottom_margin_summary"
+        android:title="@string/prefs_bottom_margin_title" />
+
+</PreferenceScreen>

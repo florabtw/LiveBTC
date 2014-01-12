@@ -2,6 +2,10 @@
 
     <string name="app_name">LiveBTC</string>
     <string name="wallpaper_label">LiveBTC</string>
+    <string name="prefs_label">Settings</string>
+    <string name="prefs_bottom_margin_message">Enter a number between 0 and 30</string>
+    <string name="prefs_bottom_margin_title">Bottom margin</string>
+    <string name="prefs_bottom_margin_summary">Extra space below chart</string>
 
     <string-array name="thirty_min_interval">
         <item>0m</item>
