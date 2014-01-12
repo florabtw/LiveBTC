@@ -36,12 +36,12 @@ public class MainWallpaper extends WallpaperService {
 
 		private Paint graphPaint, currPricePaint;
 		private final Handler handler = new Handler();
-		private int myWidth, myHeight, TOP_OFFSET, SIDE_OFFSET, BOTTOM_OFFSET, TICK_LENGTH, Y_LABEL_SPACE, X_LABEL_SPACE, CURR_PRICE_SPACE;
+		private int myWidth, myHeight, TOP_OFFSET, SIDE_OFFSET, BOTTOM_OFFSET, TICK_LENGTH, Y_LABEL_SPACE, X_LABEL_SPACE, CURR_PRICE_SPACE, CURR_PRICE_PADDING;
 
 		private final int STROKE_WIDTH = 4; // best if even number
 		private final int X_TICKS = 4;
 		private final int Y_TICKS = 4;
-		private final int PADDING = 10;
+		private final int LBL_PADDING = 10;
 
 		private String latestPrices = null;
 
@@ -88,15 +88,18 @@ public class MainWallpaper extends WallpaperService {
 			myWidth = metrics.widthPixels;
 			myHeight = metrics.heightPixels;
 
-			int graphTextSize = myWidth / 40;
-			int currPriceTextSize = myWidth / 10;
+			int combinedWeight = myWidth + myHeight;
+
+			int graphTextSize = combinedWeight / 100;
+			int currPriceTextSize = combinedWeight / 30;
 
 			graphPaint.setTextSize(graphTextSize);
 			currPricePaint.setTextSize(currPriceTextSize);
 
-			BOTTOM_OFFSET = myHeight / 100;
-			SIDE_OFFSET = myWidth / 100;
-			TICK_LENGTH = myHeight / 100;
+			BOTTOM_OFFSET = combinedWeight / 200;
+			SIDE_OFFSET = combinedWeight / 250;
+			TICK_LENGTH = combinedWeight / 150;
+			CURR_PRICE_PADDING = combinedWeight / 140;
 			Y_LABEL_SPACE = (int) graphPaint.measureText("000");
 
 			Rect rect = new Rect();
@@ -167,9 +170,9 @@ public class MainWallpaper extends WallpaperService {
 
 		void drawChart(Canvas c, String prices) {
 			int halfStroke = STROKE_WIDTH / 2;
-			int yStartGap = TOP_OFFSET + CURR_PRICE_SPACE + PADDING;
-			int yEndGap = myHeight - BOTTOM_OFFSET - X_LABEL_SPACE - PADDING;
-			int xStartGap = SIDE_OFFSET + Y_LABEL_SPACE + PADDING;
+			int yStartGap = TOP_OFFSET + CURR_PRICE_SPACE + CURR_PRICE_PADDING;
+			int yEndGap = myHeight - BOTTOM_OFFSET - X_LABEL_SPACE - LBL_PADDING;
+			int xStartGap = SIDE_OFFSET + Y_LABEL_SPACE + LBL_PADDING;
 			int yAxisHeight = yEndGap - yStartGap;
 			int xAxisWidth = myWidth - SIDE_OFFSET - xStartGap;
 			int minutesInterval = 15;
