@@ -36,11 +36,11 @@ public class PriceParser {
 	private static float findNearest(String[] pricesArray, Date now, int minutesAgo) {
 		long goalMillis = now.getTime() - (minutesAgo * 60 * 1000);
 		Date currDate = parseDate(pricesArray[lastFound].substring(0, DATE_END));
+		long currDiff = goalMillis - currDate.getTime();
 		Date nextDate;
 		for (int i = lastFound; i > 2; i--) {
 			nextDate = parseDate(pricesArray[i - 1].substring(0, DATE_END));
 
-			long currDiff = goalMillis - currDate.getTime();
 			long nextDiff = goalMillis - nextDate.getTime();
 
 			if (Math.abs(nextDiff) > Math.abs(currDiff)) {
@@ -48,6 +48,7 @@ public class PriceParser {
 				return Float.valueOf(pricesArray[i].substring(VAL_START));
 			} else {
 				currDate = nextDate;
+				currDiff = nextDiff;
 			}
 		}
 
