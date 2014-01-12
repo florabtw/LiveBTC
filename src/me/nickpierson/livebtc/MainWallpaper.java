@@ -74,9 +74,7 @@ public class MainWallpaper extends WallpaperService {
 
 			updateMeasurements();
 
-			if (latestPrices != null) {
-				draw(latestPrices);
-			}
+			draw(latestPrices);
 		}
 
 		private void updateMeasurements() {
@@ -149,20 +147,22 @@ public class MainWallpaper extends WallpaperService {
 		void draw(String prices) {
 			final SurfaceHolder holder = getSurfaceHolder();
 
-			Canvas c = null;
-			try {
-				c = holder.lockCanvas();
-				if (c != null) {
-					drawChart(c, prices);
-				}
-			} finally {
-				if (c != null) {
-					holder.unlockCanvasAndPost(c);
+			if (prices != null) {
+				Canvas c = null;
+				try {
+					c = holder.lockCanvas();
+					if (c != null) {
+						drawChart(c, prices);
+					}
+				} finally {
+					if (c != null) {
+						holder.unlockCanvasAndPost(c);
+					}
 				}
 			}
 
 			handler.removeCallbacks(runnable);
-			handler.postDelayed(runnable, 200000);
+			handler.postDelayed(runnable, 20000);
 		}
 
 		void drawChart(Canvas c, String prices) {
