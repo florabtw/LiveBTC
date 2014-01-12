@@ -43,15 +43,43 @@ public class MainWallpaper extends WallpaperService {
 		private final int Y_TICKS = 4;
 		private final int PADDING = 10;
 
+		private String latestPrices = null;
+
 		private final Runnable runnable = new Runnable() {
 			public void run() {
 				new GetPricesTask().execute();
 			}
 		};
 
+		public void onCreate(SurfaceHolder surfaceHolder) {
+			super.onCreate(surfaceHolder);
+
+			graphPaint = new Paint();
+			graphPaint.setColor(Color.WHITE);
+			graphPaint.setStrokeWidth(STROKE_WIDTH);
+			graphPaint.setStyle(Paint.Style.FILL);
+			graphPaint.setAntiAlias(true);
+
+			currPricePaint = new Paint();
+			currPricePaint.setColor(Color.WHITE);
+			currPricePaint.setAntiAlias(true);
+
+			updateMeasurements();
+
+			new GetPricesTask().execute();
+		};
+
 		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 			super.onSurfaceChanged(holder, format, width, height);
 
+			updateMeasurements();
+
+			if (latestPrices != null) {
+				draw(latestPrices);
+			}
+		}
+
+		private void updateMeasurements() {
 			TOP_OFFSET = 0;
 			int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
 			if (resourceId > 0) {
@@ -65,17 +93,8 @@ public class MainWallpaper extends WallpaperService {
 			int graphTextSize = myWidth / 40;
 			int currPriceTextSize = myWidth / 10;
 
-			graphPaint = new Paint();
-			graphPaint.setColor(Color.WHITE);
-			graphPaint.setStrokeWidth(STROKE_WIDTH);
-			graphPaint.setStyle(Paint.Style.FILL);
-			graphPaint.setAntiAlias(true);
 			graphPaint.setTextSize(graphTextSize);
-
-			currPricePaint = new Paint();
-			currPricePaint.setColor(Color.WHITE);
 			currPricePaint.setTextSize(currPriceTextSize);
-			currPricePaint.setAntiAlias(true);
 
 			BOTTOM_OFFSET = myHeight / 100;
 			SIDE_OFFSET = myWidth / 100;
@@ -88,8 +107,6 @@ public class MainWallpaper extends WallpaperService {
 
 			currPricePaint.getTextBounds("$000.00", 0, 7, rect);
 			CURR_PRICE_SPACE = rect.height();
-
-			new GetPricesTask().execute();
 		};
 
 		@Override
@@ -124,6 +141,7 @@ public class MainWallpaper extends WallpaperService {
 
 			@Override
 			protected void onPostExecute(String result) {
+				latestPrices = result;
 				draw(result);
 			}
 		}
@@ -218,7 +236,7 @@ public class MainWallpaper extends WallpaperService {
 			}
 
 			// draw current price units
-			String units = "USD / BTC";
+			String units = "USD/BTC";
 			Rect unitsBounds = new Rect();
 			graphPaint.getTextBounds(units, 0, units.length(), unitsBounds);
 			int unitsX = myWidth - SIDE_OFFSET - unitsBounds.width();
