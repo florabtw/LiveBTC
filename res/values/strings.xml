@@ -12,7 +12,16 @@
     <string name="prefs_time_interval_summary">Period of time between each point on the graph</string>
     <string name="prefs_num_points_summary">Number of points to show at the given time interval</string>
     <string name="prefs_num_points_title">Number of points</string>
+    <string name="prefs_currency_title">Currency</string>
+    <string name="prefs_currency_summary">Select a currency</string>
 
+    <string-array name="prefs_currency_entries">
+        <item>USD</item>
+        <item>EUR</item>
+        <item>CNY</item>
+        <item>GBP</item>
+        <item>CAD</item>
+    </string-array>
     <string-array name="prefs_time_interval_values">
         <item>5</item>
         <item>15</item>

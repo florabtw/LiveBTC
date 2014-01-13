@@ -34,18 +34,17 @@ public class MainWallpaper extends WallpaperService {
 
 	class MyEngine extends Engine implements OnSharedPreferenceChangeListener {
 
-		private static final String PRICES_URL = "https://api.bitcoinaverage.com/history/USD/per_minute_24h_sliding_window.csv";
-
 		private PrefsHelper prefsHelper;
 		private Paint graphPaint, currPricePaint;
 		private final Handler handler = new Handler();
-		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, Y_LABEL_SPACE, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
+		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
 				CURR_PRICE_PADDING, UPDATE_FREQUENCY_MS, TIME_INTERVAL_M, NUM_POINTS;
 
 		private final int STROKE_WIDTH = 4; // best if even number
 		private final int X_TICKS = 4;
 		private final int Y_TICKS = 4;
 		private final int LBL_PADDING = 10;
+		private String PRICES_URL, CURRENCY;
 
 		private String latestPrices = null;
 
@@ -71,6 +70,8 @@ public class MainWallpaper extends WallpaperService {
 			UPDATE_FREQUENCY_MS = 5 * 60 * 1000;
 			TIME_INTERVAL_M = prefsHelper.getTimeInterval();
 			NUM_POINTS = prefsHelper.getNumberOfPoints();
+			PRICES_URL = prefsHelper.getPricesUrl();
+			CURRENCY = prefsHelper.getCurrency();
 		}
 
 		public void onCreate(SurfaceHolder surfaceHolder) {
@@ -99,6 +100,10 @@ public class MainWallpaper extends WallpaperService {
 				TIME_INTERVAL_M = prefsHelper.getTimeInterval();
 			} else if (key.equals(PrefsHelper.NUM_POINTS_KEY)) {
 				NUM_POINTS = prefsHelper.getNumberOfPoints();
+			} else if (key.equals(PrefsHelper.CURRENCY_KEY)) {
+				PRICES_URL = prefsHelper.getPricesUrl();
+				CURRENCY = prefsHelper.getCurrency();
+				new GetPricesTask().execute();
 			}
 
 			draw(latestPrices);
@@ -129,13 +134,12 @@ public class MainWallpaper extends WallpaperService {
 			SIDE_MARGIN = combinedWeight / 250;
 			TICK_LENGTH = combinedWeight / 150;
 			CURR_PRICE_PADDING = combinedWeight / 140;
-			Y_LABEL_SPACE = (int) graphPaint.measureText("000");
 
 			Rect rect = new Rect();
 			graphPaint.getTextBounds("0m", 0, 2, rect);
 			X_LABEL_HEIGHT = rect.height();
 
-			currPricePaint.getTextBounds("$000.00", 0, 7, rect);
+			currPricePaint.getTextBounds("000.00", 0, 6, rect);
 			CURR_PRICE_SPACE = rect.height();
 		};
 
@@ -198,19 +202,20 @@ public class MainWallpaper extends WallpaperService {
 		}
 
 		void drawChart(Canvas c, String prices) {
+			ArrayList<Float> values = PriceParser.parse(prices, NUM_POINTS + 1, TIME_INTERVAL_M);
+			float maxVal = Collections.max(values);
+			float minVal = Collections.min(values);
+
 			int halfStroke = STROKE_WIDTH / 2;
+			int yAxisLabelWidth = (int) graphPaint.measureText(String.valueOf(Math.round(maxVal)));
 			int yStartGap = STATUS_BAR_HEIGHT + TOP_MARGIN;
 			int yChartStart = yStartGap + CURR_PRICE_SPACE + CURR_PRICE_PADDING;
 			int yChartEnd = myHeight - BOTTOM_MARGIN - X_LABEL_HEIGHT - LBL_PADDING;
-			int xChartStart = SIDE_MARGIN + Y_LABEL_SPACE + LBL_PADDING;
+			int xChartStart = SIDE_MARGIN + yAxisLabelWidth + LBL_PADDING;
 			int yAxisHeight = yChartEnd - yChartStart;
 			int xAxisWidth = myWidth - SIDE_MARGIN - xChartStart;
 
-			ArrayList<Float> values = PriceParser.parse(prices, NUM_POINTS + 1, TIME_INTERVAL_M);
-
 			// turn values into x, y coordinates
-			float maxVal = Collections.max(values);
-			float minVal = Collections.min(values);
 			float xScale = ((float) xAxisWidth) / (values.size() - 1);
 			float yScale = ((float) yAxisHeight) / (maxVal - minVal);
 			List<Point> graphPoints = new ArrayList<Point>();
@@ -267,7 +272,7 @@ public class MainWallpaper extends WallpaperService {
 			}
 
 			// draw current price units
-			String units = "USD/BTC";
+			String units = CURRENCY + "/BTC";
 			Rect unitsBounds = new Rect();
 			graphPaint.getTextBounds(units, 0, units.length(), unitsBounds);
 			int unitsX = myWidth - SIDE_MARGIN - unitsBounds.width();

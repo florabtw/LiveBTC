@@ -11,6 +11,7 @@ public class PrefsHelper {
 	public static final String TOP_MARGIN_KEY = "top_margin";
 	public static final String TIME_INTERVAL_KEY = "time_interval";
 	public static final String NUM_POINTS_KEY = "num_points";
+	public static final String CURRENCY_KEY = "currency";
 
 	private SharedPreferences prefs;
 
@@ -49,5 +50,13 @@ public class PrefsHelper {
 
 	public int getNumberOfPoints() {
 		return Integer.valueOf(prefs.getString(NUM_POINTS_KEY, "16"));
+	}
+
+	public String getPricesUrl() {
+		return "https://api.bitcoinaverage.com/history/" + getCurrency() + "/per_minute_24h_sliding_window.csv";
+	}
+
+	public String getCurrency() {
+		return prefs.getString(CURRENCY_KEY, "USD");
 	}
 }
