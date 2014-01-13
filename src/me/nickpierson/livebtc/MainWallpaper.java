@@ -39,7 +39,8 @@ public class MainWallpaper extends WallpaperService {
 		private PrefsHelper prefsHelper;
 		private Paint graphPaint, currPricePaint;
 		private final Handler handler = new Handler();
-		private int myWidth, myHeight, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, Y_LABEL_SPACE, X_LABEL_SPACE, CURR_PRICE_SPACE, CURR_PRICE_PADDING;
+		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, Y_LABEL_SPACE, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
+				CURR_PRICE_PADDING;
 
 		private final int STROKE_WIDTH = 4; // best if even number
 		private final int X_TICKS = 4;
@@ -88,6 +89,8 @@ public class MainWallpaper extends WallpaperService {
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 			if (key.equals(PrefsHelper.BOTTOM_MARGIN_KEY)) {
 				BOTTOM_MARGIN = prefsHelper.getBottomMargin(myHeight);
+			} else if (key.equals(PrefsHelper.TOP_MARGIN_KEY)) {
+				TOP_MARGIN = prefsHelper.getTopMargin(myHeight);
 			}
 
 			draw(latestPrices);
@@ -98,6 +101,15 @@ public class MainWallpaper extends WallpaperService {
 			myWidth = metrics.widthPixels;
 			myHeight = metrics.heightPixels;
 
+			STATUS_BAR_HEIGHT = 0;
+			int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+			if (resourceId > 0) {
+				STATUS_BAR_HEIGHT = getResources().getDimensionPixelSize(resourceId);
+			}
+
+			TOP_MARGIN = prefsHelper.getTopMargin(myHeight);
+			BOTTOM_MARGIN = prefsHelper.getBottomMargin(myHeight);
+
 			int combinedWeight = myWidth + myHeight;
 
 			int graphTextSize = combinedWeight / 100;
@@ -106,22 +118,14 @@ public class MainWallpaper extends WallpaperService {
 			graphPaint.setTextSize(graphTextSize);
 			currPricePaint.setTextSize(currPriceTextSize);
 
-			BOTTOM_MARGIN = prefsHelper.getBottomMargin(myHeight);
-
 			SIDE_MARGIN = combinedWeight / 250;
 			TICK_LENGTH = combinedWeight / 150;
 			CURR_PRICE_PADDING = combinedWeight / 140;
 			Y_LABEL_SPACE = (int) graphPaint.measureText("000");
 
-			TOP_MARGIN = 0;
-			int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-			if (resourceId > 0) {
-				TOP_MARGIN = getResources().getDimensionPixelSize(resourceId);
-			}
-
 			Rect rect = new Rect();
 			graphPaint.getTextBounds("0m", 0, 2, rect);
-			X_LABEL_SPACE = rect.height();
+			X_LABEL_HEIGHT = rect.height();
 
 			currPricePaint.getTextBounds("$000.00", 0, 7, rect);
 			CURR_PRICE_SPACE = rect.height();
@@ -187,11 +191,12 @@ public class MainWallpaper extends WallpaperService {
 
 		void drawChart(Canvas c, String prices) {
 			int halfStroke = STROKE_WIDTH / 2;
-			int yStartGap = TOP_MARGIN + CURR_PRICE_SPACE + CURR_PRICE_PADDING;
-			int yEndGap = myHeight - BOTTOM_MARGIN - X_LABEL_SPACE - LBL_PADDING;
-			int xStartGap = SIDE_MARGIN + Y_LABEL_SPACE + LBL_PADDING;
-			int yAxisHeight = yEndGap - yStartGap;
-			int xAxisWidth = myWidth - SIDE_MARGIN - xStartGap;
+			int yStartGap = STATUS_BAR_HEIGHT + TOP_MARGIN;
+			int yChartStart = yStartGap + CURR_PRICE_SPACE + CURR_PRICE_PADDING;
+			int yChartEnd = myHeight - BOTTOM_MARGIN - X_LABEL_HEIGHT - LBL_PADDING;
+			int xChartStart = SIDE_MARGIN + Y_LABEL_SPACE + LBL_PADDING;
+			int yAxisHeight = yChartEnd - yChartStart;
+			int xAxisWidth = myWidth - SIDE_MARGIN - xChartStart;
 			int minutesInterval = 15;
 			int dataPoints = 8;
 
@@ -204,8 +209,8 @@ public class MainWallpaper extends WallpaperService {
 			float yScale = ((float) yAxisHeight) / (maxVal - minVal);
 			List<Point> graphPoints = new ArrayList<Point>();
 			for (int i = 0; i < values.size(); i++) {
-				int x = (int) (i * xScale + xStartGap);
-				int y = (int) ((maxVal - values.get(i)) * yScale + yStartGap);
+				int x = (int) (i * xScale + xChartStart);
+				int y = (int) ((maxVal - values.get(i)) * yScale + yChartStart);
 				graphPoints.add(new Point(x, y));
 			}
 
@@ -213,35 +218,35 @@ public class MainWallpaper extends WallpaperService {
 			c.drawColor(Color.BLACK);
 
 			// draw axes
-			c.drawLine(xStartGap, yStartGap, xStartGap, yEndGap + halfStroke, graphPaint);
-			c.drawLine(xStartGap + halfStroke, yEndGap, myWidth - SIDE_MARGIN, yEndGap, graphPaint);
+			c.drawLine(xChartStart, yChartStart, xChartStart, yChartEnd + halfStroke, graphPaint);
+			c.drawLine(xChartStart + halfStroke, yChartEnd, myWidth - SIDE_MARGIN, yChartEnd, graphPaint);
 
 			// draw tick marks, labels for x axis
 			float xTickInterval = (float) xAxisWidth / X_TICKS;
 			String[] xLabels = getResources().getStringArray(R.array.thirty_min_interval);
-			DrawHelper.drawXLabel(c, xLabels[xLabels.length - 1], graphPaint, xStartGap, myHeight - BOTTOM_MARGIN, DrawHelper.Position.PAST);
+			DrawHelper.drawXLabel(c, xLabels[xLabels.length - 1], graphPaint, xChartStart, myHeight - BOTTOM_MARGIN, DrawHelper.Position.PAST);
 			for (int i = 1; i < X_TICKS; i++) {
 				float xPos = (myWidth - SIDE_MARGIN) - (i * xTickInterval);
-				c.drawLine(xPos, yEndGap + halfStroke, xPos, yEndGap + halfStroke - TICK_LENGTH, graphPaint);
+				c.drawLine(xPos, yChartEnd + halfStroke, xPos, yChartEnd + halfStroke - TICK_LENGTH, graphPaint);
 
 				DrawHelper.drawXLabel(c, xLabels[i], graphPaint, xPos, myHeight - BOTTOM_MARGIN, DrawHelper.Position.CENTER);
 			}
-			c.drawLine(myWidth - SIDE_MARGIN, yEndGap + halfStroke, myWidth - SIDE_MARGIN, yEndGap + halfStroke - TICK_LENGTH, graphPaint);
+			c.drawLine(myWidth - SIDE_MARGIN, yChartEnd + halfStroke, myWidth - SIDE_MARGIN, yChartEnd + halfStroke - TICK_LENGTH, graphPaint);
 			DrawHelper.drawXLabel(c, xLabels[0], graphPaint, myWidth - SIDE_MARGIN, myHeight - BOTTOM_MARGIN, DrawHelper.Position.BEFORE);
 
 			// draw tick marks, labels for y axis
 			float yTickInterval = (float) yAxisHeight / Y_TICKS;
 			float yValueInterval = (maxVal - minVal) / Y_TICKS;
-			c.drawLine(xStartGap - halfStroke, yStartGap, xStartGap + TICK_LENGTH, yStartGap, graphPaint);
-			DrawHelper.drawYLabel(c, String.valueOf(Math.round(maxVal)), graphPaint, SIDE_MARGIN, yStartGap, DrawHelper.Position.PAST);
+			c.drawLine(xChartStart - halfStroke, yChartStart, xChartStart + TICK_LENGTH, yChartStart, graphPaint);
+			DrawHelper.drawYLabel(c, String.valueOf(Math.round(maxVal)), graphPaint, SIDE_MARGIN, yChartStart, DrawHelper.Position.PAST);
 			for (int i = 1; i < Y_TICKS; i++) {
-				float yPos = yStartGap + (i * yTickInterval);
-				c.drawLine(xStartGap - halfStroke, yPos, xStartGap + TICK_LENGTH, yPos, graphPaint);
+				float yPos = yChartStart + (i * yTickInterval);
+				c.drawLine(xChartStart - halfStroke, yPos, xChartStart + TICK_LENGTH, yPos, graphPaint);
 
 				String yLabel = String.valueOf((int) Math.round(maxVal - (i * yValueInterval)));
 				DrawHelper.drawYLabel(c, yLabel, graphPaint, SIDE_MARGIN, yPos, DrawHelper.Position.CENTER);
 			}
-			DrawHelper.drawYLabel(c, String.valueOf(Math.round(minVal)), graphPaint, SIDE_MARGIN, yEndGap, DrawHelper.Position.BEFORE);
+			DrawHelper.drawYLabel(c, String.valueOf(Math.round(minVal)), graphPaint, SIDE_MARGIN, yChartEnd, DrawHelper.Position.BEFORE);
 
 			// draw lines for graph
 			c.drawCircle(graphPoints.get(0).x, graphPoints.get(0).y, halfStroke, graphPaint);
@@ -260,12 +265,12 @@ public class MainWallpaper extends WallpaperService {
 			Rect unitsBounds = new Rect();
 			graphPaint.getTextBounds(units, 0, units.length(), unitsBounds);
 			int unitsX = myWidth - SIDE_MARGIN - unitsBounds.width();
-			c.drawText(units, unitsX, TOP_MARGIN + CURR_PRICE_SPACE, graphPaint);
+			c.drawText(units, unitsX, yStartGap + CURR_PRICE_SPACE, graphPaint);
 
 			// draw current price
 			String currPrice = String.format(Locale.US, "%.02f", values.get(values.size() - 1));
 			int currPriceX = unitsX - (int) currPricePaint.measureText(currPrice);
-			c.drawText(currPrice, currPriceX, TOP_MARGIN + CURR_PRICE_SPACE, currPricePaint);
+			c.drawText(currPrice, currPriceX, yStartGap + CURR_PRICE_SPACE, currPricePaint);
 		}
 	}
 }
