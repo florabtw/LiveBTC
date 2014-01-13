@@ -70,7 +70,7 @@ public class MainWallpaper extends WallpaperService {
 
 			UPDATE_FREQUENCY_MS = 5 * 60 * 1000;
 			TIME_INTERVAL_M = prefsHelper.getTimeInterval();
-			NUM_POINTS = 8;
+			NUM_POINTS = prefsHelper.getNumberOfPoints();
 		}
 
 		public void onCreate(SurfaceHolder surfaceHolder) {
@@ -97,6 +97,8 @@ public class MainWallpaper extends WallpaperService {
 				TOP_MARGIN = prefsHelper.getTopMargin(myHeight);
 			} else if (key.equals(PrefsHelper.TIME_INTERVAL_KEY)) {
 				TIME_INTERVAL_M = prefsHelper.getTimeInterval();
+			} else if (key.equals(PrefsHelper.NUM_POINTS_KEY)) {
+				NUM_POINTS = prefsHelper.getNumberOfPoints();
 			}
 
 			draw(latestPrices);

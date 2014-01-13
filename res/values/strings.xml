@@ -10,6 +10,8 @@
     <string name="prefs_top_margin_summary">Percent margin between chart and top of screen</string>
     <string name="prefs_time_interval_title">Time interval</string>
     <string name="prefs_time_interval_summary">Period of time between each point on the graph</string>
+    <string name="prefs_num_points_summary">Number of points to show at the given time interval</string>
+    <string name="prefs_num_points_title">Number of points</string>
 
     <string-array name="prefs_time_interval_values">
         <item>5</item>
@@ -22,6 +24,11 @@
         <item>15 minutes</item>
         <item>30 minutes</item>
         <item>1 hour</item>
+    </string-array>
+    <string-array name="prefs_num_points_entries">
+        <item>8</item>
+        <item>16</item>
+        <item>24</item>
     </string-array>
     <string-array name="forty_min_span">
         <item>0m</item>

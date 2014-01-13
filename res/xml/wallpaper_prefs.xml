@@ -10,6 +10,13 @@
         android:key="time_interval"
         android:summary="@string/prefs_time_interval_summary"
         android:title="@string/prefs_time_interval_title" />
+    <ListPreference
+        android:defaultValue="16"
+        android:entries="@array/prefs_num_points_entries"
+        android:entryValues="@array/prefs_num_points_entries"
+        android:key="num_points"
+        android:summary="@string/prefs_num_points_summary"
+        android:title="@string/prefs_num_points_title" />
 
     <EditTextPreference
         android:defaultValue="1"

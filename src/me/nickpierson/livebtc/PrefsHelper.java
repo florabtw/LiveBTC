@@ -10,6 +10,7 @@ public class PrefsHelper {
 	public static final String BOTTOM_MARGIN_KEY = "bottom_margin";
 	public static final String TOP_MARGIN_KEY = "top_margin";
 	public static final String TIME_INTERVAL_KEY = "time_interval";
+	public static final String NUM_POINTS_KEY = "num_points";
 
 	private SharedPreferences prefs;
 
@@ -45,4 +46,8 @@ public class PrefsHelper {
 	public int getTimeInterval() {
 		return Integer.valueOf(prefs.getString(TIME_INTERVAL_KEY, "30"));
 	};
+
+	public int getNumberOfPoints() {
+		return Integer.valueOf(prefs.getString(NUM_POINTS_KEY, "16"));
+	}
 }
