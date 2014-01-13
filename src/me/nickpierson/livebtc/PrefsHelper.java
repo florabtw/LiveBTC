@@ -43,6 +43,6 @@ public class PrefsHelper {
 	}
 
 	public int getTimeInterval() {
-		return Integer.valueOf(prefs.getString(TIME_INTERVAL_KEY, "15"));
+		return Integer.valueOf(prefs.getString(TIME_INTERVAL_KEY, "30"));
 	};
 }

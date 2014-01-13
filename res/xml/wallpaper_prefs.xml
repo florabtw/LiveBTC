@@ -4,7 +4,7 @@
     android:title="@string/prefs_label" >
 
     <ListPreference
-        android:defaultValue="15"
+        android:defaultValue="30"
         android:entries="@array/prefs_time_interval_entries"
         android:entryValues="@array/prefs_time_interval_values"
         android:key="time_interval"
