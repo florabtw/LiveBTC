@@ -23,10 +23,6 @@ public class PriceParser {
 		lastFound = pricesArray.length - 1;
 		for (int i = 0; i < numPoints; i++) {
 			float val = findNearest(pricesArray, now, minuteInterval * i);
-			if (val == 0) {
-				return null;
-			}
-
 			results.add(0, val);
 		}
 
@@ -38,7 +34,7 @@ public class PriceParser {
 		Date currDate = parseDate(pricesArray[lastFound].substring(0, DATE_END));
 		long currDiff = goalMillis - currDate.getTime();
 		Date nextDate;
-		for (int i = lastFound; i > 2; i--) {
+		for (int i = lastFound; i > 1; i--) {
 			nextDate = parseDate(pricesArray[i - 1].substring(0, DATE_END));
 
 			long nextDiff = goalMillis - nextDate.getTime();
@@ -52,7 +48,7 @@ public class PriceParser {
 			}
 		}
 
-		return 0;
+		return Float.valueOf(pricesArray[1].substring(VAL_START));
 	}
 
 	private static Date parseDate(String dateAsString) {
