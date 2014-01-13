@@ -40,7 +40,7 @@ public class MainWallpaper extends WallpaperService {
 		private Paint graphPaint, currPricePaint;
 		private final Handler handler = new Handler();
 		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, Y_LABEL_SPACE, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
-				CURR_PRICE_PADDING;
+				CURR_PRICE_PADDING, UPDATE_FREQUENCY_MS;
 
 		private final int STROKE_WIDTH = 4; // best if even number
 		private final int X_TICKS = 4;
@@ -65,6 +65,8 @@ public class MainWallpaper extends WallpaperService {
 			currPricePaint = new Paint();
 			currPricePaint.setColor(Color.WHITE);
 			currPricePaint.setAntiAlias(true);
+
+			UPDATE_FREQUENCY_MS = 5 * 60 * 1000;
 
 			prefsHelper = new PrefsHelper(MainWallpaper.this, this);
 		}
@@ -186,7 +188,7 @@ public class MainWallpaper extends WallpaperService {
 			}
 
 			handler.removeCallbacks(runnable);
-			handler.postDelayed(runnable, 60000);
+			handler.postDelayed(runnable, UPDATE_FREQUENCY_MS);
 		}
 
 		void drawChart(Canvas c, String prices) {
