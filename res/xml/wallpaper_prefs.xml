@@ -4,6 +4,14 @@
     android:title="@string/prefs_label" >
 
     <ListPreference
+        android:defaultValue="USD"
+        android:entries="@array/prefs_currency_entries"
+        android:entryValues="@array/prefs_currency_entries"
+        android:key="currency"
+        android:summary="@string/prefs_currency_summary"
+        android:title="@string/prefs_currency_title" >
+    </ListPreference>
+    <ListPreference
         android:defaultValue="30"
         android:entries="@array/prefs_time_interval_entries"
         android:entryValues="@array/prefs_time_interval_values"
