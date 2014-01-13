@@ -8,27 +8,83 @@
     <string name="prefs_bottom_margin_summary">Percent margin between chart and bottom of screen</string>
     <string name="prefs_top_margin_title">Top margin</string>
     <string name="prefs_top_margin_summary">Percent margin between chart and top of screen</string>
+    <string name="prefs_time_interval_title">Time interval</string>
+    <string name="prefs_time_interval_summary">Period of time between each point on the graph</string>
 
-    <string-array name="thirty_min_interval">
+    <string-array name="prefs_time_interval_values">
+        <item>5</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
+    <string-array name="prefs_time_interval_entries">
+        <item>5 minutes</item>
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+    </string-array>
+    <string-array name="forty_min_span">
+        <item>0m</item>
+        <item>10m</item>
+        <item>20m</item>
+        <item>30m</item>
+        <item>40m</item>
+    </string-array>
+    <string-array name="one_hour_twenty_min_span">
+        <item>0m</item>
+        <item>20m</item>
+        <item>40m</item>
+        <item>1h</item>
+        <item>1h 20m</item>
+    </string-array>
+    <string-array name="two_hour_span">
         <item>0m</item>
         <item>30m</item>
         <item>1h</item>
-        <item>1.5h</item>
+        <item>1h 30m</item>
         <item>2h</item>
     </string-array>
-    <string-array name="sixty_min_interval">
+    <string-array name="four_hour_span">
         <item>0h</item>
         <item>1h</item>
         <item>2h</item>
         <item>3h</item>
         <item>4h</item>
     </string-array>
-    <string-array name="ninety_min_interval">
+    <string-array name="six_hour_span">
         <item>0h</item>
-        <item>1.5h</item>
+        <item>1h 30m</item>
         <item>3h</item>
-        <item>4.5h</item>
+        <item>4h 30m</item>
         <item>6h</item>
+    </string-array>
+    <string-array name="eight_hour_span">
+        <item>0h</item>
+        <item>2h</item>
+        <item>4h</item>
+        <item>6h</item>
+        <item>8h</item>
+    </string-array>
+    <string-array name="twelve_hour_span">
+        <item>0h</item>
+        <item>3h</item>
+        <item>6h</item>
+        <item>9h</item>
+        <item>12h</item>
+    </string-array>
+    <string-array name="sixteen_hour_span">
+        <item>0h</item>
+        <item>4h</item>
+        <item>8h</item>
+        <item>12h</item>
+        <item>16h</item>
+    </string-array>
+    <string-array name="twenty_four_hour_span">
+        <item>0h</item>
+        <item>6h</item>
+        <item>12h</item>
+        <item>18h</item>
+        <item>24h</item>
     </string-array>
 
 </resources>

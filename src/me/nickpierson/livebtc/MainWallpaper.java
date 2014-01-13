@@ -40,7 +40,7 @@ public class MainWallpaper extends WallpaperService {
 		private Paint graphPaint, currPricePaint;
 		private final Handler handler = new Handler();
 		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, Y_LABEL_SPACE, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
-				CURR_PRICE_PADDING, UPDATE_FREQUENCY_MS;
+				CURR_PRICE_PADDING, UPDATE_FREQUENCY_MS, TIME_INTERVAL_M, NUM_POINTS;
 
 		private final int STROKE_WIDTH = 4; // best if even number
 		private final int X_TICKS = 4;
@@ -66,9 +66,11 @@ public class MainWallpaper extends WallpaperService {
 			currPricePaint.setColor(Color.WHITE);
 			currPricePaint.setAntiAlias(true);
 
-			UPDATE_FREQUENCY_MS = 5 * 60 * 1000;
-
 			prefsHelper = new PrefsHelper(MainWallpaper.this, this);
+
+			UPDATE_FREQUENCY_MS = 5 * 60 * 1000;
+			TIME_INTERVAL_M = prefsHelper.getTimeInterval();
+			NUM_POINTS = 8;
 		}
 
 		public void onCreate(SurfaceHolder surfaceHolder) {
@@ -93,6 +95,8 @@ public class MainWallpaper extends WallpaperService {
 				BOTTOM_MARGIN = prefsHelper.getBottomMargin(myHeight);
 			} else if (key.equals(PrefsHelper.TOP_MARGIN_KEY)) {
 				TOP_MARGIN = prefsHelper.getTopMargin(myHeight);
+			} else if (key.equals(PrefsHelper.TIME_INTERVAL_KEY)) {
+				TIME_INTERVAL_M = prefsHelper.getTimeInterval();
 			}
 
 			draw(latestPrices);
@@ -199,10 +203,8 @@ public class MainWallpaper extends WallpaperService {
 			int xChartStart = SIDE_MARGIN + Y_LABEL_SPACE + LBL_PADDING;
 			int yAxisHeight = yChartEnd - yChartStart;
 			int xAxisWidth = myWidth - SIDE_MARGIN - xChartStart;
-			int minutesInterval = 15;
-			int dataPoints = 8;
 
-			ArrayList<Float> values = PriceParser.parse(prices, dataPoints + 1, minutesInterval);
+			ArrayList<Float> values = PriceParser.parse(prices, NUM_POINTS + 1, TIME_INTERVAL_M);
 
 			// turn values into x, y coordinates
 			float maxVal = Collections.max(values);
@@ -225,7 +227,7 @@ public class MainWallpaper extends WallpaperService {
 
 			// draw tick marks, labels for x axis
 			float xTickInterval = (float) xAxisWidth / X_TICKS;
-			String[] xLabels = getResources().getStringArray(R.array.thirty_min_interval);
+			String[] xLabels = DrawHelper.getXAxisLabels(TIME_INTERVAL_M, NUM_POINTS, MainWallpaper.this);
 			DrawHelper.drawXLabel(c, xLabels[xLabels.length - 1], graphPaint, xChartStart, myHeight - BOTTOM_MARGIN, DrawHelper.Position.PAST);
 			for (int i = 1; i < X_TICKS; i++) {
 				float xPos = (myWidth - SIDE_MARGIN) - (i * xTickInterval);

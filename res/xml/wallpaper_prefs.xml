@@ -3,13 +3,19 @@
     android:key="wallpaper_settings"
     android:title="@string/prefs_label" >
 
+    <ListPreference
+        android:defaultValue="15"
+        android:entries="@array/prefs_time_interval_entries"
+        android:entryValues="@array/prefs_time_interval_values"
+        android:key="time_interval"
+        android:summary="@string/prefs_time_interval_summary"
+        android:title="@string/prefs_time_interval_title" />
+
     <EditTextPreference
         android:defaultValue="1"
         android:dialogMessage="@string/prefs_margin_message"
         android:dialogTitle="@string/prefs_top_margin_title"
         android:key="top_margin"
-        android:negativeButtonText="Cancel"
-        android:positiveButtonText="Save"
         android:summary="@string/prefs_top_margin_summary"
         android:title="@string/prefs_top_margin_title" />
     <EditTextPreference
@@ -17,8 +23,6 @@
         android:dialogMessage="@string/prefs_margin_message"
         android:dialogTitle="@string/prefs_bottom_margin_title"
         android:key="bottom_margin"
-        android:negativeButtonText="Cancel"
-        android:positiveButtonText="Save"
         android:summary="@string/prefs_bottom_margin_summary"
         android:title="@string/prefs_bottom_margin_title" />
 

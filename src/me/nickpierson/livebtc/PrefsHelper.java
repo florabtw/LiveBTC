@@ -9,6 +9,7 @@ public class PrefsHelper {
 
 	public static final String BOTTOM_MARGIN_KEY = "bottom_margin";
 	public static final String TOP_MARGIN_KEY = "top_margin";
+	public static final String TIME_INTERVAL_KEY = "time_interval";
 
 	private SharedPreferences prefs;
 
@@ -40,4 +41,8 @@ public class PrefsHelper {
 
 		return (int) (height * percentMargin);
 	}
+
+	public int getTimeInterval() {
+		return Integer.valueOf(prefs.getString(TIME_INTERVAL_KEY, "15"));
+	};
 }
