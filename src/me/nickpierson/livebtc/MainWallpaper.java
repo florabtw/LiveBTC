@@ -38,9 +38,8 @@ public class MainWallpaper extends WallpaperService {
 		private Paint graphPaint, currPricePaint;
 		private final Handler handler = new Handler();
 		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
-				CURR_PRICE_PADDING, UPDATE_FREQUENCY_MS, TIME_INTERVAL_M, NUM_POINTS;
+				CURR_PRICE_PADDING, UPDATE_FREQUENCY_MS, TIME_INTERVAL_M, NUM_POINTS, STROKE_WIDTH;
 
-		private final int STROKE_WIDTH = 4; // best if even number
 		private final int X_TICKS = 4;
 		private final int Y_TICKS = 4;
 		private final int LBL_PADDING = 10;
@@ -57,13 +56,36 @@ public class MainWallpaper extends WallpaperService {
 		public MyEngine() {
 			graphPaint = new Paint();
 			graphPaint.setColor(Color.WHITE);
-			graphPaint.setStrokeWidth(STROKE_WIDTH);
 			graphPaint.setStyle(Paint.Style.FILL);
 			graphPaint.setAntiAlias(true);
 
 			currPricePaint = new Paint();
 			currPricePaint.setColor(Color.WHITE);
 			currPricePaint.setAntiAlias(true);
+
+			DisplayMetrics metrics = getResources().getDisplayMetrics();
+			myWidth = metrics.widthPixels;
+			myHeight = metrics.heightPixels;
+
+			int combinedWeight = myWidth + myHeight;
+
+			SIDE_MARGIN = combinedWeight / 250;
+			TICK_LENGTH = combinedWeight / 150;
+			CURR_PRICE_PADDING = combinedWeight / 140;
+			STROKE_WIDTH = combinedWeight / 750;
+
+			// best if stroke width is even
+			if (STROKE_WIDTH > 1 && STROKE_WIDTH % 2 == 1) {
+				STROKE_WIDTH++;
+			}
+
+			graphPaint.setStrokeWidth(STROKE_WIDTH);
+
+			int graphTextSize = combinedWeight / 100;
+			int currPriceTextSize = combinedWeight / 30;
+
+			graphPaint.setTextSize(graphTextSize);
+			currPricePaint.setTextSize(currPriceTextSize);
 
 			prefsHelper = new PrefsHelper(MainWallpaper.this, this);
 
@@ -122,18 +144,6 @@ public class MainWallpaper extends WallpaperService {
 
 			TOP_MARGIN = prefsHelper.getTopMargin(myHeight);
 			BOTTOM_MARGIN = prefsHelper.getBottomMargin(myHeight);
-
-			int combinedWeight = myWidth + myHeight;
-
-			int graphTextSize = combinedWeight / 100;
-			int currPriceTextSize = combinedWeight / 30;
-
-			graphPaint.setTextSize(graphTextSize);
-			currPricePaint.setTextSize(currPriceTextSize);
-
-			SIDE_MARGIN = combinedWeight / 250;
-			TICK_LENGTH = combinedWeight / 150;
-			CURR_PRICE_PADDING = combinedWeight / 140;
 
 			Rect rect = new Rect();
 			graphPaint.getTextBounds("0m", 0, 2, rect);
