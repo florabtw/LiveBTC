@@ -15,7 +15,6 @@ import org.apache.http.util.EntityUtils;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -55,12 +54,10 @@ public class MainWallpaper extends WallpaperService {
 
 		public MyEngine() {
 			graphPaint = new Paint();
-			graphPaint.setColor(Color.WHITE);
 			graphPaint.setStyle(Paint.Style.FILL);
 			graphPaint.setAntiAlias(true);
 
 			currPricePaint = new Paint();
-			currPricePaint.setColor(Color.WHITE);
 			currPricePaint.setAntiAlias(true);
 
 			DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -95,6 +92,10 @@ public class MainWallpaper extends WallpaperService {
 			PRICES_URL = prefsHelper.getPricesUrl();
 			CURRENCY = prefsHelper.getCurrency();
 			BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
+			int lineColor = prefsHelper.getLineColor();
+
+			graphPaint.setColor(lineColor);
+			currPricePaint.setColor(lineColor);
 		}
 
 		public void onCreate(SurfaceHolder surfaceHolder) {
@@ -129,6 +130,10 @@ public class MainWallpaper extends WallpaperService {
 				new GetPricesTask().execute();
 			} else if (key.equals(PrefsHelper.BASIC_BACKGROUND_KEY)) {
 				BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
+			} else if (key.equals(PrefsHelper.BASIC_LINE_KEY)) {
+				int lineColor = prefsHelper.getLineColor();
+				graphPaint.setColor(lineColor);
+				currPricePaint.setColor(lineColor);
 			}
 
 			draw(latestPrices);

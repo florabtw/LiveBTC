@@ -26,6 +26,13 @@
         android:summary="@string/prefs_num_points_summary"
         android:title="@string/prefs_num_points_title" />
     <ListPreference
+        android:defaultValue="White"
+        android:entries="@array/prefs_colors"
+        android:entryValues="@array/prefs_colors"
+        android:key="basic_line_color"
+        android:summary="@string/prefs_line_color_summary"
+        android:title="@string/prefs_line_color_title" />
+    <ListPreference
         android:defaultValue="Black"
         android:entries="@array/prefs_colors"
         android:entryValues="@array/prefs_colors"

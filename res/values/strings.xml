@@ -14,6 +14,10 @@
     <string name="prefs_num_points_title">Number of points</string>
     <string name="prefs_currency_title">Currency</string>
     <string name="prefs_currency_summary">Select a currency</string>
+    <string name="prefs_bkgd_color_summary">Select a background color</string>
+    <string name="prefs_bkgd_color_title">Background color</string>
+    <string name="prefs_line_color_summary">Select a line color</string>
+    <string name="prefs_line_color_title">Line color</string>
 
     <string-array name="prefs_colors">
         <item>Black</item>
@@ -113,8 +117,5 @@
         <item>18h</item>
         <item>24h</item>
     </string-array>
-
-    <string name="prefs_bkgd_color_summary">Select a background color</string>
-    <string name="prefs_bkgd_color_title">Background color</string>
 
 </resources>
