@@ -64,9 +64,7 @@ public class PrefsHelper {
 
 	public int getBackgroundColor() {
 		String prefsColor = prefs.getString(BASIC_BACKGROUND_KEY, "Black");
-		if (prefsColor.equals("Black")) {
-			return Color.BLACK;
-		} else if (prefsColor.equals("Blue")) {
+		if (prefsColor.equals("Blue")) {
 			return Color.BLUE;
 		} else if (prefsColor.equals("Cyan")) {
 			return Color.CYAN;
@@ -83,7 +81,6 @@ public class PrefsHelper {
 		} else if (prefsColor.equals("Yellow")) {
 			return Color.YELLOW;
 		} else {
-			// should never happen
 			return Color.BLACK;
 		}
 	}
