@@ -3,6 +3,7 @@ package me.nickpierson.livebtc;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 
 public class PrefsHelper {
@@ -12,6 +13,7 @@ public class PrefsHelper {
 	public static final String TIME_INTERVAL_KEY = "time_interval";
 	public static final String NUM_POINTS_KEY = "num_points";
 	public static final String CURRENCY_KEY = "currency";
+	public static final String BASIC_BACKGROUND_KEY = "basic_background_color";
 
 	private SharedPreferences prefs;
 
@@ -58,5 +60,28 @@ public class PrefsHelper {
 
 	public String getCurrency() {
 		return prefs.getString(CURRENCY_KEY, "USD");
+	}
+
+	public int getBackgroundColor() {
+		String prefsColor = prefs.getString(BASIC_BACKGROUND_KEY, "Black");
+		if (prefsColor.equals("Blue")) {
+			return Color.BLUE;
+		} else if (prefsColor.equals("Cyan")) {
+			return Color.CYAN;
+		} else if (prefsColor.equals("Gray")) {
+			return Color.GRAY;
+		} else if (prefsColor.equals("Green")) {
+			return Color.GREEN;
+		} else if (prefsColor.equals("Magenta")) {
+			return Color.MAGENTA;
+		} else if (prefsColor.equals("Red")) {
+			return Color.RED;
+		} else if (prefsColor.equals("White")) {
+			return Color.WHITE;
+		} else if (prefsColor.equals("Yellow")) {
+			return Color.YELLOW;
+		} else {
+			return Color.BLACK;
+		}
 	}
 }

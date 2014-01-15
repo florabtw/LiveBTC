@@ -25,6 +25,13 @@
         android:key="num_points"
         android:summary="@string/prefs_num_points_summary"
         android:title="@string/prefs_num_points_title" />
+    <ListPreference
+        android:defaultValue="Black"
+        android:entries="@array/prefs_colors"
+        android:entryValues="@array/prefs_colors"
+        android:key="basic_background_color"
+        android:summary="@string/prefs_bkgd_color_summary"
+        android:title="@string/prefs_bkgd_color_title" />
 
     <EditTextPreference
         android:defaultValue="1"
