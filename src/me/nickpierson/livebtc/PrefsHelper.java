@@ -14,6 +14,7 @@ public class PrefsHelper {
 	public static final String NUM_POINTS_KEY = "num_points";
 	public static final String CURRENCY_KEY = "currency";
 	public static final String BASIC_BACKGROUND_KEY = "basic_background_color";
+	public static final String BASIC_LINE_KEY = "basic_line_color";
 
 	private SharedPreferences prefs;
 
@@ -64,6 +65,15 @@ public class PrefsHelper {
 
 	public int getBackgroundColor() {
 		String prefsColor = prefs.getString(BASIC_BACKGROUND_KEY, "Black");
+		return getColor(prefsColor);
+	}
+
+	public int getLineColor() {
+		String prefsColor = prefs.getString(BASIC_LINE_KEY, "White");
+		return getColor(prefsColor);
+	}
+
+	public int getColor(String prefsColor) {
 		if (prefsColor.equals("Blue")) {
 			return Color.BLUE;
 		} else if (prefsColor.equals("Cyan")) {
