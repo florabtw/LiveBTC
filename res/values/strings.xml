@@ -15,6 +15,17 @@
     <string name="prefs_currency_title">Currency</string>
     <string name="prefs_currency_summary">Select a currency</string>
 
+    <string-array name="prefs_colors">
+        <item>Black</item>
+        <item>Blue</item>
+        <item>Cyan</item>
+        <item>Gray</item>
+        <item>Green</item>
+        <item>Magenta</item>
+        <item>Red</item>
+        <item>White</item>
+        <item>Yellow</item>
+    </string-array>
     <string-array name="prefs_currency_entries">
         <item>USD</item>
         <item>EUR</item>
@@ -102,5 +113,8 @@
         <item>18h</item>
         <item>24h</item>
     </string-array>
+
+    <string name="prefs_bkgd_color_summary">Select a background color</string>
+    <string name="prefs_bkgd_color_title">Background color</string>
 
 </resources>

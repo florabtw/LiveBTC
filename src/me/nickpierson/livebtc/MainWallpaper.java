@@ -38,7 +38,7 @@ public class MainWallpaper extends WallpaperService {
 		private Paint graphPaint, currPricePaint;
 		private final Handler handler = new Handler();
 		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
-				CURR_PRICE_PADDING, UPDATE_FREQUENCY_MS, TIME_INTERVAL_M, NUM_POINTS, STROKE_WIDTH;
+				CURR_PRICE_PADDING, UPDATE_FREQUENCY_MS, TIME_INTERVAL_M, NUM_POINTS, STROKE_WIDTH, BACKGROUND_COLOR;
 
 		private final int X_TICKS = 4;
 		private final int Y_TICKS = 4;
@@ -94,6 +94,7 @@ public class MainWallpaper extends WallpaperService {
 			NUM_POINTS = prefsHelper.getNumberOfPoints();
 			PRICES_URL = prefsHelper.getPricesUrl();
 			CURRENCY = prefsHelper.getCurrency();
+			BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
 		}
 
 		public void onCreate(SurfaceHolder surfaceHolder) {
@@ -126,6 +127,8 @@ public class MainWallpaper extends WallpaperService {
 				PRICES_URL = prefsHelper.getPricesUrl();
 				CURRENCY = prefsHelper.getCurrency();
 				new GetPricesTask().execute();
+			} else if (key.equals(PrefsHelper.BASIC_BACKGROUND_KEY)) {
+				BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
 			}
 
 			draw(latestPrices);
@@ -236,7 +239,7 @@ public class MainWallpaper extends WallpaperService {
 			}
 
 			// draw background
-			c.drawColor(Color.BLACK);
+			c.drawColor(BACKGROUND_COLOR);
 
 			// draw axes
 			c.drawLine(xChartStart, yChartStart, xChartStart, yChartEnd + halfStroke, graphPaint);
