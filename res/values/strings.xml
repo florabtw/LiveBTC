@@ -18,6 +18,10 @@
     <string name="prefs_bkgd_color_title">Background color</string>
     <string name="prefs_line_color_summary">Select a line color</string>
     <string name="prefs_line_color_title">Line color</string>
+    <string name="prefs_advanced_colors_title">Use advanced colors</string>
+    <string name="prefs_advanced_color_message">Enter a hexadecimal color code. Must be exactly 6 digits long.</string>
+    <string name="prefs_advanced_line_color_summary">Hex code for line color</string>
+    <string name="prefs_advanced_background_summary">Hex code for background color</string>
 
     <string-array name="prefs_colors">
         <item>Black</item>

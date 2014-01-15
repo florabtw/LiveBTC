@@ -55,4 +55,31 @@
         android:summary="@string/prefs_bottom_margin_summary"
         android:title="@string/prefs_bottom_margin_title" />
 
+    <PreferenceScreen
+        android:key="advanced_settings"
+        android:persistent="false"
+        android:title="Advanced Settings" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="override_basic_colors"
+            android:title="@string/prefs_advanced_colors_title" />
+
+        <EditTextPreference
+            android:defaultValue="FF6600"
+            android:dependency="override_basic_colors"
+            android:dialogMessage="@string/prefs_advanced_color_message"
+            android:dialogTitle="@string/prefs_line_color_title"
+            android:key="advanced_line"
+            android:summary="@string/prefs_advanced_line_color_summary"
+            android:title="@string/prefs_line_color_title" />
+        <EditTextPreference
+            android:defaultValue="75A3FF"
+            android:dependency="override_basic_colors"
+            android:dialogMessage="@string/prefs_advanced_color_message"
+            android:dialogTitle="@string/prefs_bkgd_color_title"
+            android:key="advanced_background"
+            android:summary="@string/prefs_advanced_background_summary"
+            android:title="@string/prefs_bkgd_color_title" />
+    </PreferenceScreen>
+
 </PreferenceScreen>

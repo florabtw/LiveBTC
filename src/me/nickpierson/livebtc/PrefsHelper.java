@@ -15,6 +15,9 @@ public class PrefsHelper {
 	public static final String CURRENCY_KEY = "currency";
 	public static final String BASIC_BACKGROUND_KEY = "basic_background_color";
 	public static final String BASIC_LINE_KEY = "basic_line_color";
+	public static final String USE_ADVANCED_COLORS_KEY = "override_basic_colors";
+	public static final String ADVANCED_LINE_KEY = "advanced_line";
+	public static final String ADVANCED_BACKGROUND_KEY = "advanced_background";
 
 	private SharedPreferences prefs;
 
@@ -64,13 +67,34 @@ public class PrefsHelper {
 	}
 
 	public int getBackgroundColor() {
-		String prefsColor = prefs.getString(BASIC_BACKGROUND_KEY, "Black");
-		return getColor(prefsColor);
+		boolean useAdvanced = prefs.getBoolean(USE_ADVANCED_COLORS_KEY, false);
+
+		int color = 0;
+		if (useAdvanced) {
+			String advancedColor = prefs.getString(ADVANCED_BACKGROUND_KEY, "#75A3FF");
+			color = parseColor(advancedColor);
+		} else {
+			String basicColor = prefs.getString(BASIC_BACKGROUND_KEY, "Black");
+			color = getColor(basicColor);
+		}
+
+		return color;
 	}
 
 	public int getLineColor() {
-		String prefsColor = prefs.getString(BASIC_LINE_KEY, "White");
-		return getColor(prefsColor);
+		// TODO refactor
+		boolean useAdvanced = prefs.getBoolean(USE_ADVANCED_COLORS_KEY, false);
+
+		int color = 0;
+		if (useAdvanced) {
+			String advancedColor = prefs.getString(ADVANCED_LINE_KEY, "#FF6600");
+			color = parseColor(advancedColor);
+		} else {
+			String basicColor = prefs.getString(BASIC_LINE_KEY, "White");
+			color = getColor(basicColor);
+		}
+
+		return color;
 	}
 
 	public int getColor(String prefsColor) {
@@ -93,5 +117,20 @@ public class PrefsHelper {
 		} else {
 			return Color.BLACK;
 		}
+	}
+
+	public int parseColor(String stringColor) {
+		if (!stringColor.startsWith("#")) {
+			stringColor = "#" + stringColor;
+		}
+
+		int color;
+		try {
+			color = Color.parseColor(stringColor);
+		} catch (Exception e) {
+			color = Color.BLACK;
+		}
+
+		return color;
 	}
 }
