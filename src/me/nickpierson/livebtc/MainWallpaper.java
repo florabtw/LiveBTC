@@ -129,11 +129,23 @@ public class MainWallpaper extends WallpaperService {
 				CURRENCY = prefsHelper.getCurrency();
 				new GetPricesTask().execute();
 			} else if (key.equals(PrefsHelper.BASIC_BACKGROUND_KEY)) {
+				// TODO refactor
 				BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
 			} else if (key.equals(PrefsHelper.BASIC_LINE_KEY)) {
 				int lineColor = prefsHelper.getLineColor();
 				graphPaint.setColor(lineColor);
 				currPricePaint.setColor(lineColor);
+			} else if (key.equals(PrefsHelper.USE_ADVANCED_COLORS_KEY)) {
+				BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
+				int lineColor = prefsHelper.getLineColor();
+				graphPaint.setColor(lineColor);
+				currPricePaint.setColor(lineColor);
+			} else if (key.equals(PrefsHelper.ADVANCED_LINE_KEY)) {
+				int lineColor = prefsHelper.getLineColor();
+				graphPaint.setColor(lineColor);
+				currPricePaint.setColor(lineColor);
+			} else if (key.equals(PrefsHelper.ADVANCED_BACKGROUND_KEY)) {
+				BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
 			}
 
 			draw(latestPrices);
