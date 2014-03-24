@@ -57,7 +57,7 @@ public class PriceHandler extends Observable implements OnSharedPreferenceChange
 		if (receiver.hasConnection()) {
 			if (awaitingNetwork) {
 				timer.startTiming();
-				context.unregisterReceiver(receiver);
+				unregisterReceiver();
 				awaitingNetwork = false;
 			}
 
@@ -75,9 +75,15 @@ public class PriceHandler extends Observable implements OnSharedPreferenceChange
 			this.prices = prices;
 			this.currency = currency;
 
-			pricesList = PriceParser.parse(prices, numPoints, timeInterval);
+			parsePrices();
 			setChanged();
 			notifyObservers();
+		}
+	}
+
+	private void parsePrices() {
+		if (prices != null) {
+			pricesList = PriceParser.parse(prices, numPoints, timeInterval);
 		}
 	}
 
@@ -97,18 +103,24 @@ public class PriceHandler extends Observable implements OnSharedPreferenceChange
 			attemptPriceUpdate();
 		} else if (key.equals(PrefsHelper.TIME_INTERVAL_KEY)) {
 			timeInterval = prefsHelper.getTimeInterval();
-			pricesList = PriceParser.parse(prices, numPoints, timeInterval);
+			parsePrices();
 		} else if (key.equals(PrefsHelper.NUM_POINTS_KEY)) {
 			numPoints = prefsHelper.getNumberOfPoints();
-			pricesList = PriceParser.parse(prices, numPoints, timeInterval);
+			parsePrices();
 		}
 
-		notifyObservers();
+		if (!awaitingNetwork) {
+			setChanged();
+			notifyObservers();
+		}
 	}
 
 	public void stopUpdating() {
 		timer.stopTiming();
+		unregisterReceiver();
+	}
 
+	private void unregisterReceiver() {
 		try {
 			context.unregisterReceiver(receiver);
 		} catch (IllegalArgumentException e) {
@@ -118,6 +130,18 @@ public class PriceHandler extends Observable implements OnSharedPreferenceChange
 
 	public String getCurrency() {
 		return currency;
+	}
+
+	public int getTimeInterval() {
+		return timeInterval;
+	}
+
+	public int getNumberOfPoints() {
+		return numPoints;
+	}
+
+	public boolean hasPrices() {
+		return pricesList != null;
 	}
 
 	public ArrayList<Float> getLatestPrices() {

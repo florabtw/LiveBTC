@@ -33,7 +33,7 @@ public class MainWallpaper extends WallpaperService {
 		private Paint graphPaint, currPricePaint;
 
 		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
-				CURR_PRICE_PADDING, TIME_INTERVAL_M, NUM_POINTS, STROKE_WIDTH, BACKGROUND_COLOR;
+				CURR_PRICE_PADDING, STROKE_WIDTH, BACKGROUND_COLOR;
 
 		private final int X_TICKS = 4;
 		private final int Y_TICKS = 4;
@@ -74,8 +74,6 @@ public class MainWallpaper extends WallpaperService {
 			prefsHelper = new PrefsHelper(MainWallpaper.this);
 			prefsHelper.registerOnSharedPreferenceChangeListener(this);
 
-			TIME_INTERVAL_M = prefsHelper.getTimeInterval();
-			NUM_POINTS = prefsHelper.getNumberOfPoints();
 			BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
 			int lineColor = prefsHelper.getLineColor();
 
@@ -98,7 +96,7 @@ public class MainWallpaper extends WallpaperService {
 
 			updateMeasurements();
 
-			draw(priceHandler.getLatestPrices());
+			draw();
 		}
 
 		@Override
@@ -107,10 +105,6 @@ public class MainWallpaper extends WallpaperService {
 				BOTTOM_MARGIN = prefsHelper.getBottomMargin(myHeight);
 			} else if (key.equals(PrefsHelper.TOP_MARGIN_KEY)) {
 				TOP_MARGIN = prefsHelper.getTopMargin(myHeight);
-			} else if (key.equals(PrefsHelper.TIME_INTERVAL_KEY)) {
-				TIME_INTERVAL_M = prefsHelper.getTimeInterval();
-			} else if (key.equals(PrefsHelper.NUM_POINTS_KEY)) {
-				NUM_POINTS = prefsHelper.getNumberOfPoints();
 			} else if (key.equals(PrefsHelper.BASIC_BACKGROUND_KEY)) {
 				// TODO refactor
 				BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
@@ -134,7 +128,7 @@ public class MainWallpaper extends WallpaperService {
 				return;
 			}
 
-			draw(priceHandler.getLatestPrices());
+			draw();
 		}
 
 		private void updateMeasurements() {
@@ -162,19 +156,19 @@ public class MainWallpaper extends WallpaperService {
 		@Override
 		public void update(Observable observable, Object o) {
 			if (observable == priceHandler) {
-				draw(priceHandler.getLatestPrices());
+				draw();
 			}
 		}
 
-		void draw(ArrayList<Float> prices) {
+		void draw() {
 			final SurfaceHolder holder = getSurfaceHolder();
 
-			if (prices != null) {
+			if (priceHandler.hasPrices()) {
 				Canvas c = null;
 				try {
 					c = holder.lockCanvas();
 					if (c != null) {
-						drawChart(c, prices);
+						drawChart(c);
 					}
 				} finally {
 					if (c != null) {
@@ -184,7 +178,9 @@ public class MainWallpaper extends WallpaperService {
 			}
 		}
 
-		void drawChart(Canvas c, ArrayList<Float> prices) {
+		void drawChart(Canvas c) {
+			ArrayList<Float> prices = priceHandler.getLatestPrices();
+
 			float maxVal = Collections.max(prices);
 			float minVal = Collections.min(prices);
 
@@ -216,7 +212,7 @@ public class MainWallpaper extends WallpaperService {
 
 			// draw tick marks, labels for x axis
 			float xTickInterval = (float) xAxisWidth / X_TICKS;
-			String[] xLabels = DrawHelper.getXAxisLabels(TIME_INTERVAL_M, NUM_POINTS, MainWallpaper.this);
+			String[] xLabels = DrawHelper.getXAxisLabels(priceHandler.getTimeInterval(), priceHandler.getNumberOfPoints(), MainWallpaper.this);
 			DrawHelper.drawXLabel(c, xLabels[xLabels.length - 1], graphPaint, xChartStart, myHeight - BOTTOM_MARGIN, DrawHelper.Position.PAST);
 			for (int i = 1; i < X_TICKS; i++) {
 				float xPos = (myWidth - SIDE_MARGIN) - (i * xTickInterval);
