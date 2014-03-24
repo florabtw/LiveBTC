@@ -30,6 +30,10 @@ class GetPricesTask extends AsyncTask<String, Void, String> {
 		try {
 			HttpClient client = new DefaultHttpClient();
 			HttpGet get = new HttpGet(pricesUrl[0]);
+
+			get.addHeader("User-Agent", "LiveBTC Android Live Wallpaper");
+			get.addHeader("From", "piersync@gmail.com");
+
 			HttpResponse responseGet = client.execute(get);
 			HttpEntity resEntityGet = responseGet.getEntity();
 			if (resEntityGet != null) {
