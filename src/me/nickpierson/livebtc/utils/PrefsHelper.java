@@ -45,8 +45,10 @@ public class PrefsHelper {
 			e.printStackTrace();
 		}
 
-		// max allowed is 30%
-		if (percentMargin > .3) {
+		// max allowed is 30%, negative percentages not allowed
+		if (percentMargin < 0) {
+			percentMargin = 0;
+		} else if (percentMargin > .3) {
 			percentMargin = .3f;
 		}
 
