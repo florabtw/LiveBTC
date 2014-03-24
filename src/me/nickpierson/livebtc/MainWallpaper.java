@@ -90,6 +90,7 @@ public class MainWallpaper extends WallpaperService {
 
 			priceHandler = new PriceHandler(MainWallpaper.this);
 			priceHandler.addObserver(this);
+			priceHandler.beginUpdating();
 		};
 
 		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {

@@ -46,8 +46,10 @@ public class PriceHandler extends Observable implements OnSharedPreferenceChange
 		receiver = new NetworkReceiver(this, context);
 
 		timer = new Timer(this, UPDATE_FREQUENCY_MS);
-		timer.startTiming();
+	}
 
+	public void beginUpdating() {
+		timer.startTiming();
 		attemptPriceUpdate();
 	}
 
@@ -69,10 +71,10 @@ public class PriceHandler extends Observable implements OnSharedPreferenceChange
 
 	@Override
 	public void onPricesChanged(String prices, String currency) {
-		this.prices = prices;
-		this.currency = currency;
-
 		if (prices != null) {
+			this.prices = prices;
+			this.currency = currency;
+
 			pricesList = PriceParser.parse(prices, numPoints, timeInterval);
 			setChanged();
 			notifyObservers();
