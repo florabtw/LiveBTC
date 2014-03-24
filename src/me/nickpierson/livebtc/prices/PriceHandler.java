@@ -3,43 +3,28 @@ package me.nickpierson.livebtc.prices;
 import java.util.ArrayList;
 import java.util.Observable;
 
+import me.nickpierson.livebtc.network.NetworkObserver;
+import me.nickpierson.livebtc.timing.Timer;
+import me.nickpierson.livebtc.timing.TimeObserver;
 import me.nickpierson.livebtc.utils.PrefsHelper;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.net.ConnectivityManager;
+import android.util.Log;
 
-public class PriceHandler extends Observable implements OnSharedPreferenceChangeListener {
+public class PriceHandler extends Observable implements OnSharedPreferenceChangeListener, NetworkObserver, TimeObserver, PriceChangeObserver {
 
 	private static final int UPDATE_FREQUENCY_MS = 5 * 60 * 1000;
 	private int timeInterval, numPoints;
 
 	private final PrefsHelper prefsHelper;
-	private final Runnable runnable;
 
 	private String currency;
 	private String prices;
 	private ArrayList<Float> pricesList;
-
-	private Handler handler = new Handler(new Handler.Callback() {
-		@Override
-		public boolean handleMessage(Message msg) {
-			Bundle data = msg.getData();
-			prices = data.getString(GetPricesTask.BUNDLE_PRICES_KEY);
-			currency = data.getString(GetPricesTask.BUNDLE_CURR_KEY);
-
-			if (prices != null) {
-				pricesList = PriceParser.parse(prices, numPoints, timeInterval);
-				setChanged();
-				notifyObservers();
-				return true;
-			} else {
-				return false;
-			}
-		}
-	});
+	private Timer timer;
 
 	public PriceHandler(Context context) {
 		prefsHelper = new PrefsHelper(context);
@@ -48,23 +33,41 @@ public class PriceHandler extends Observable implements OnSharedPreferenceChange
 		timeInterval = prefsHelper.getTimeInterval();
 		numPoints = prefsHelper.getNumberOfPoints();
 
-		runnable = new Runnable() {
-			@Override
-			public void run() {
-				attemptPriceUpdate();
-			}
-		};
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+
+		// NetworkReceiver receiver = new NetworkReceiver(this, context);
+		// context.registerReceiver(receiver, filter);
+
+		timer = new Timer(this, UPDATE_FREQUENCY_MS);
+		timer.startTiming();
 	}
 
 	public void attemptPriceUpdate() {
-		new GetPricesTask(handler, prefsHelper.getCurrency()).execute(prefsHelper.getPricesUrl());
-
-		handler.removeCallbacks(runnable);
-		handler.postDelayed(runnable, UPDATE_FREQUENCY_MS);
+		Log.e("TAG", "Price updating!!");
+		new GetPricesTask(this, prefsHelper.getCurrency()).execute(prefsHelper.getPricesUrl());
 	}
 
-	public void removeCallbacks() {
-		handler.removeCallbacks(runnable);
+	@Override
+	public void onPricesChanged(String prices, String currency) {
+		this.prices = prices;
+		this.currency = currency;
+
+		if (prices != null) {
+			pricesList = PriceParser.parse(prices, numPoints, timeInterval);
+			setChanged();
+			notifyObservers();
+		}
+	}
+
+	@Override
+	public void onConnected() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void onTimeEvent() {
+		attemptPriceUpdate();
 	}
 
 	@Override
@@ -80,6 +83,11 @@ public class PriceHandler extends Observable implements OnSharedPreferenceChange
 		}
 
 		notifyObservers();
+	}
+
+	public void stopUpdating() {
+		timer.stopTiming();
+		// TODO unregister networkreceiver?
 	}
 
 	public String getCurrency() {

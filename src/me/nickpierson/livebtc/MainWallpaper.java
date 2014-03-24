@@ -269,13 +269,13 @@ public class MainWallpaper extends WallpaperService {
 		@Override
 		public void onDestroy() {
 			super.onDestroy();
-			priceHandler.removeCallbacks();
+			priceHandler.stopUpdating();
 		}
 
 		@Override
 		public void onSurfaceDestroyed(SurfaceHolder holder) {
 			super.onSurfaceDestroyed(holder);
-			priceHandler.removeCallbacks();
+			priceHandler.stopUpdating();
 		}
 	}
 }

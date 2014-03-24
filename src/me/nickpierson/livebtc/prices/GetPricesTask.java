@@ -8,20 +8,17 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 
 class GetPricesTask extends AsyncTask<String, Void, String> {
 
 	static final String BUNDLE_PRICES_KEY = "bundle_prices_key";
 	static final String BUNDLE_CURR_KEY = "bundle_currency_key";
 
-	private Handler handler;
+	PriceChangeObserver observer;
 	private String currency;
 
-	public GetPricesTask(Handler handler, String currency) {
-		this.handler = handler;
+	public GetPricesTask(PriceChangeObserver observer, String currency) {
+		this.observer = observer;
 		this.currency = currency;
 	}
 
@@ -48,11 +45,6 @@ class GetPricesTask extends AsyncTask<String, Void, String> {
 
 	@Override
 	protected void onPostExecute(String result) {
-		Message message = handler.obtainMessage();
-		Bundle bundle = new Bundle();
-		bundle.putString(BUNDLE_PRICES_KEY, result);
-		bundle.putString(BUNDLE_CURR_KEY, currency);
-		message.setData(bundle);
-		handler.sendMessage(message);
+		observer.onPricesChanged(result, currency);
 	}
 }
