@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import me.nickpierson.livebtc.prices.PriceParser;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -84,8 +86,10 @@ public class MainWallpaper extends WallpaperService {
 			graphPaint.setTextSize(graphTextSize);
 			currPricePaint.setTextSize(currPriceTextSize);
 
-			prefsHelper = new PrefsHelper(MainWallpaper.this, this);
+			prefsHelper = new PrefsHelper(MainWallpaper.this);
+			prefsHelper.registerOnSharedPreferenceChangeListener(this);
 
+			// TODO remove UFMS, TIM, NP
 			UPDATE_FREQUENCY_MS = 5 * 60 * 1000;
 			TIME_INTERVAL_M = prefsHelper.getTimeInterval();
 			NUM_POINTS = prefsHelper.getNumberOfPoints();
@@ -124,10 +128,6 @@ public class MainWallpaper extends WallpaperService {
 				TIME_INTERVAL_M = prefsHelper.getTimeInterval();
 			} else if (key.equals(PrefsHelper.NUM_POINTS_KEY)) {
 				NUM_POINTS = prefsHelper.getNumberOfPoints();
-			} else if (key.equals(PrefsHelper.CURRENCY_KEY)) {
-				PRICES_URL = prefsHelper.getPricesUrl();
-				CURRENCY = prefsHelper.getCurrency();
-				new GetPricesTask().execute();
 			} else if (key.equals(PrefsHelper.BASIC_BACKGROUND_KEY)) {
 				// TODO refactor
 				BACKGROUND_COLOR = prefsHelper.getBackgroundColor();

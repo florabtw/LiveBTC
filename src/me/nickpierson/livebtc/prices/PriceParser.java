@@ -1,4 +1,4 @@
-package me.nickpierson.livebtc;
+package me.nickpierson.livebtc.prices;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

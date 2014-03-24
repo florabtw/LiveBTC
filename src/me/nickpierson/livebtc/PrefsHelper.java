@@ -21,8 +21,11 @@ public class PrefsHelper {
 
 	private SharedPreferences prefs;
 
-	public <T extends OnSharedPreferenceChangeListener> PrefsHelper(Context context, T listener) {
+	public PrefsHelper(Context context) {
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
+	}
+
+	public <T extends OnSharedPreferenceChangeListener> void registerOnSharedPreferenceChangeListener(T listener) {
 		prefs.registerOnSharedPreferenceChangeListener(listener);
 	}
 
