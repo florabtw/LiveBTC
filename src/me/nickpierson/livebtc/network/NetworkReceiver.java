@@ -9,11 +9,12 @@ import android.net.NetworkInfo;
 public class NetworkReceiver extends BroadcastReceiver {
 
 	private NetworkObserver observer;
-	private Context context;
+	private ConnectivityManager connManager;
 
 	public NetworkReceiver(NetworkObserver observer, Context context) {
 		this.observer = observer;
-		this.context = context;
+
+		connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 	}
 
 	@Override
@@ -24,8 +25,7 @@ public class NetworkReceiver extends BroadcastReceiver {
 	}
 
 	public boolean hasConnection() {
-		ConnectivityManager conn = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+		NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
 
 		if (networkInfo != null && networkInfo.isConnected()) {
 			return true;

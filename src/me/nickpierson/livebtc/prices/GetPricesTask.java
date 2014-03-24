@@ -14,7 +14,7 @@ class GetPricesTask extends AsyncTask<String, Void, String> {
 	static final String BUNDLE_PRICES_KEY = "bundle_prices_key";
 	static final String BUNDLE_CURR_KEY = "bundle_currency_key";
 
-	PriceChangeObserver observer;
+	private PriceChangeObserver observer;
 	private String currency;
 
 	public GetPricesTask(PriceChangeObserver observer, String currency) {

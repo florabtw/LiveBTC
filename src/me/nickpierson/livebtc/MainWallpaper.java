@@ -29,7 +29,7 @@ public class MainWallpaper extends WallpaperService {
 	class MyEngine extends Engine implements OnSharedPreferenceChangeListener, Observer {
 
 		private PrefsHelper prefsHelper;
-		private PriceHandler priceHandler = new PriceHandler(MainWallpaper.this);
+		private PriceHandler priceHandler;
 		private Paint graphPaint, currPricePaint;
 
 		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
@@ -74,8 +74,6 @@ public class MainWallpaper extends WallpaperService {
 			prefsHelper = new PrefsHelper(MainWallpaper.this);
 			prefsHelper.registerOnSharedPreferenceChangeListener(this);
 
-			priceHandler.addObserver(this);
-
 			TIME_INTERVAL_M = prefsHelper.getTimeInterval();
 			NUM_POINTS = prefsHelper.getNumberOfPoints();
 			BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
@@ -90,7 +88,8 @@ public class MainWallpaper extends WallpaperService {
 
 			updateMeasurements();
 
-			priceHandler.attemptPriceUpdate();
+			priceHandler = new PriceHandler(MainWallpaper.this);
+			priceHandler.addObserver(this);
 		};
 
 		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {

@@ -22,7 +22,9 @@ public class Timer {
 
 			@Override
 			public void run() {
-				timeEvent();
+				if (isTiming) {
+					timeEvent();
+				}
 			}
 		});
 	}
@@ -32,6 +34,11 @@ public class Timer {
 			postThreadWithDelay();
 			isTiming = true;
 		}
+	}
+
+	public void stopTiming() {
+		handler.removeCallbacks(timerThread);
+		isTiming = false;
 	}
 
 	private void timeEvent() {
@@ -47,10 +54,5 @@ public class Timer {
 
 	private void notifyObserver() {
 		observer.onTimeEvent();
-	}
-
-	public void stopTiming() {
-		handler.removeCallbacks(timerThread);
-		isTiming = false;
 	}
 }
