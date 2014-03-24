@@ -14,12 +14,15 @@ import android.os.Message;
 
 class GetPricesTask extends AsyncTask<String, Void, String> {
 
-	public static final String BUNDLE_PRICES_KEY = "bundle_prices_key";
+	static final String BUNDLE_PRICES_KEY = "bundle_prices_key";
+	static final String BUNDLE_CURR_KEY = "bundle_currency_key";
 
 	private Handler handler;
+	private String currency;
 
-	public GetPricesTask(Handler handler) {
+	public GetPricesTask(Handler handler, String currency) {
 		this.handler = handler;
+		this.currency = currency;
 	}
 
 	@Override
@@ -41,12 +44,11 @@ class GetPricesTask extends AsyncTask<String, Void, String> {
 
 	@Override
 	protected void onPostExecute(String result) {
-		// latestPrices = result;
 		Message message = handler.obtainMessage();
 		Bundle bundle = new Bundle();
 		bundle.putString(BUNDLE_PRICES_KEY, result);
+		bundle.putString(BUNDLE_CURR_KEY, currency);
 		message.setData(bundle);
 		handler.sendMessage(message);
-		// draw(result);
 	}
 }

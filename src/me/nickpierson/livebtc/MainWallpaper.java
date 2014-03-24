@@ -4,24 +4,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Observable;
+import java.util.Observer;
 
-import me.nickpierson.livebtc.prices.PriceParser;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
+import me.nickpierson.livebtc.prices.PriceHandler;
+import me.nickpierson.livebtc.utils.PrefsHelper;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
 import android.util.DisplayMetrics;
 import android.view.SurfaceHolder;
@@ -33,26 +26,18 @@ public class MainWallpaper extends WallpaperService {
 		return new MyEngine();
 	}
 
-	class MyEngine extends Engine implements OnSharedPreferenceChangeListener {
+	class MyEngine extends Engine implements OnSharedPreferenceChangeListener, Observer {
 
 		private PrefsHelper prefsHelper;
+		private PriceHandler priceHandler = new PriceHandler(MainWallpaper.this);
 		private Paint graphPaint, currPricePaint;
-		private final Handler handler = new Handler();
+
 		private int myWidth, myHeight, STATUS_BAR_HEIGHT, TOP_MARGIN, SIDE_MARGIN, BOTTOM_MARGIN, TICK_LENGTH, X_LABEL_HEIGHT, CURR_PRICE_SPACE,
-				CURR_PRICE_PADDING, UPDATE_FREQUENCY_MS, TIME_INTERVAL_M, NUM_POINTS, STROKE_WIDTH, BACKGROUND_COLOR;
+				CURR_PRICE_PADDING, TIME_INTERVAL_M, NUM_POINTS, STROKE_WIDTH, BACKGROUND_COLOR;
 
 		private final int X_TICKS = 4;
 		private final int Y_TICKS = 4;
 		private final int LBL_PADDING = 10;
-		private String PRICES_URL, CURRENCY;
-
-		private String latestPrices = null;
-
-		private final Runnable runnable = new Runnable() {
-			public void run() {
-				new GetPricesTask().execute();
-			}
-		};
 
 		public MyEngine() {
 			graphPaint = new Paint();
@@ -89,12 +74,10 @@ public class MainWallpaper extends WallpaperService {
 			prefsHelper = new PrefsHelper(MainWallpaper.this);
 			prefsHelper.registerOnSharedPreferenceChangeListener(this);
 
-			// TODO remove UFMS, TIM, NP
-			UPDATE_FREQUENCY_MS = 5 * 60 * 1000;
+			priceHandler.addObserver(this);
+
 			TIME_INTERVAL_M = prefsHelper.getTimeInterval();
 			NUM_POINTS = prefsHelper.getNumberOfPoints();
-			PRICES_URL = prefsHelper.getPricesUrl();
-			CURRENCY = prefsHelper.getCurrency();
 			BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
 			int lineColor = prefsHelper.getLineColor();
 
@@ -107,7 +90,7 @@ public class MainWallpaper extends WallpaperService {
 
 			updateMeasurements();
 
-			new GetPricesTask().execute();
+			priceHandler.attemptPriceUpdate();
 		};
 
 		public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -115,7 +98,7 @@ public class MainWallpaper extends WallpaperService {
 
 			updateMeasurements();
 
-			draw(latestPrices);
+			draw(priceHandler.getLatestPrices());
 		}
 
 		@Override
@@ -146,9 +129,12 @@ public class MainWallpaper extends WallpaperService {
 				currPricePaint.setColor(lineColor);
 			} else if (key.equals(PrefsHelper.ADVANCED_BACKGROUND_KEY)) {
 				BACKGROUND_COLOR = prefsHelper.getBackgroundColor();
+			} else {
+				// don't draw for other preference changes
+				return;
 			}
 
-			draw(latestPrices);
+			draw(priceHandler.getLatestPrices());
 		}
 
 		private void updateMeasurements() {
@@ -174,43 +160,13 @@ public class MainWallpaper extends WallpaperService {
 		};
 
 		@Override
-		public void onDestroy() {
-			super.onDestroy();
-			handler.removeCallbacks(runnable);
-		}
-
-		@Override
-		public void onSurfaceDestroyed(SurfaceHolder holder) {
-			super.onSurfaceDestroyed(holder);
-			handler.removeCallbacks(runnable);
-		}
-
-		private class GetPricesTask extends AsyncTask<Void, Void, String> {
-			@Override
-			protected String doInBackground(Void... params) {
-				try {
-					HttpClient client = new DefaultHttpClient();
-					HttpGet get = new HttpGet(PRICES_URL);
-					HttpResponse responseGet = client.execute(get);
-					HttpEntity resEntityGet = responseGet.getEntity();
-					if (resEntityGet != null) {
-						return EntityUtils.toString(resEntityGet);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(String result) {
-				latestPrices = result;
-				draw(result);
+		public void update(Observable observable, Object o) {
+			if (observable == priceHandler) {
+				draw(priceHandler.getLatestPrices());
 			}
 		}
 
-		void draw(String prices) {
+		void draw(ArrayList<Float> prices) {
 			final SurfaceHolder holder = getSurfaceHolder();
 
 			if (prices != null) {
@@ -226,15 +182,11 @@ public class MainWallpaper extends WallpaperService {
 					}
 				}
 			}
-
-			handler.removeCallbacks(runnable);
-			handler.postDelayed(runnable, UPDATE_FREQUENCY_MS);
 		}
 
-		void drawChart(Canvas c, String prices) {
-			ArrayList<Float> values = PriceParser.parse(prices, NUM_POINTS + 1, TIME_INTERVAL_M);
-			float maxVal = Collections.max(values);
-			float minVal = Collections.min(values);
+		void drawChart(Canvas c, ArrayList<Float> prices) {
+			float maxVal = Collections.max(prices);
+			float minVal = Collections.min(prices);
 
 			int halfStroke = STROKE_WIDTH / 2;
 			int yAxisLabelWidth = (int) graphPaint.measureText(String.valueOf(Math.round(maxVal)));
@@ -246,12 +198,12 @@ public class MainWallpaper extends WallpaperService {
 			int xAxisWidth = myWidth - SIDE_MARGIN - xChartStart;
 
 			// turn values into x, y coordinates
-			float xScale = ((float) xAxisWidth) / (values.size() - 1);
+			float xScale = ((float) xAxisWidth) / (prices.size() - 1);
 			float yScale = ((float) yAxisHeight) / (maxVal - minVal);
 			List<Point> graphPoints = new ArrayList<Point>();
-			for (int i = 0; i < values.size(); i++) {
+			for (int i = 0; i < prices.size(); i++) {
 				int x = (int) (i * xScale + xChartStart);
-				int y = (int) ((maxVal - values.get(i)) * yScale + yChartStart);
+				int y = (int) ((maxVal - prices.get(i)) * yScale + yChartStart);
 				graphPoints.add(new Point(x, y));
 			}
 
@@ -302,16 +254,28 @@ public class MainWallpaper extends WallpaperService {
 			}
 
 			// draw current price units
-			String units = CURRENCY + "/BTC";
+			String units = priceHandler.getCurrency() + "/BTC";
 			Rect unitsBounds = new Rect();
 			graphPaint.getTextBounds(units, 0, units.length(), unitsBounds);
 			int unitsX = myWidth - SIDE_MARGIN - unitsBounds.width();
 			c.drawText(units, unitsX, yStartGap + CURR_PRICE_SPACE, graphPaint);
 
 			// draw current price
-			String currPrice = String.format(Locale.US, "%.02f", values.get(values.size() - 1));
+			String currPrice = String.format(Locale.US, "%.02f", prices.get(prices.size() - 1));
 			int currPriceX = unitsX - (int) currPricePaint.measureText(currPrice);
 			c.drawText(currPrice, currPriceX, yStartGap + CURR_PRICE_SPACE, currPricePaint);
+		}
+
+		@Override
+		public void onDestroy() {
+			super.onDestroy();
+			priceHandler.removeCallbacks();
+		}
+
+		@Override
+		public void onSurfaceDestroyed(SurfaceHolder holder) {
+			super.onSurfaceDestroyed(holder);
+			priceHandler.removeCallbacks();
 		}
 	}
 }

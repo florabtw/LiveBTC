@@ -1,4 +1,4 @@
-package me.nickpierson.livebtc;
+package me.nickpierson.livebtc.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

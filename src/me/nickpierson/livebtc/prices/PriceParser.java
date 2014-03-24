@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-public class PriceParser {
+class PriceParser {
 
 	private static final int VAL_START = 20;
 	private static final int DATE_END = 19;
